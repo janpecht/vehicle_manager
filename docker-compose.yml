@@ -17,5 +17,34 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build: ./backend
+    container_name: sprinter-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://sprinter:sprinter_dev_password@postgres:5432/sprinter_damage_db?schema=public"
+      JWT_ACCESS_SECRET: "dev-access-secret-change-in-production-min32chars"
+      JWT_REFRESH_SECRET: "dev-refresh-secret-change-in-production-min32chars"
+      ACCESS_TOKEN_EXPIRES_IN: "15m"
+      REFRESH_TOKEN_EXPIRES_IN_DAYS: "7"
+      BCRYPT_ROUNDS: "12"
+      PORT: "3001"
+      NODE_ENV: "development"
+      CORS_ORIGIN: "http://localhost:5173"
+
+  frontend:
+    build: ./frontend
+    container_name: sprinter-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
