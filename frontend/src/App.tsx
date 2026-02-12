@@ -9,6 +9,7 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary.tsx';
 import { VehicleListPage } from './components/vehicles/VehicleListPage.tsx';
 import { VehicleDetailPage } from './components/vehicles/VehicleDetailPage.tsx';
 import { DamageReportPage } from './components/vehicles/DamageReportPage.tsx';
+import { PublicReportPage } from './components/vehicles/PublicReportPage.tsx';
 import { DamageReport } from './components/damage-canvas/DamageReport.tsx';
 import { useAuthInit } from './hooks/useAuth.ts';
 
@@ -44,6 +45,8 @@ function AppRoutes() {
         <Route path="/vehicles/:id" element={<VehicleDetailPage />} />
         <Route path="/vehicles/:id/report" element={<DamageReportPage />} />
       </Route>
+      {/* Public report — no login required */}
+      <Route path="/report/vehicles/:id" element={<PublicReportPage />} />
       {/* Embed route — no AppLayout chrome, just the report */}
       <Route
         path="/embed/vehicles/:id"

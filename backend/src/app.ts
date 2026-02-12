@@ -8,11 +8,15 @@ import { config } from './config.js';
 import authRoutes from './auth/auth.routes.js';
 import vehicleRoutes from './vehicles/vehicles.routes.js';
 import damageRoutes from './damages/damages.routes.js';
+import publicRoutes from './public/public.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { openApiSpec } from './openapi.js';
 
 export function createApp() {
   const app = express();
+
+  // Trust proxy (for running behind nginx/reverse proxy)
+  app.set('trust proxy', 1);
 
   // Security headers
   app.use(helmet());
@@ -50,6 +54,9 @@ export function createApp() {
   if (config.NODE_ENV !== 'test') {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
   }
+
+  // Public routes (no authentication required)
+  app.use('/public', apiLimiter, publicRoutes);
 
   // Routes
   app.use('/auth', authRoutes);
