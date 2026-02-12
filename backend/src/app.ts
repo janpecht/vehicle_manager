@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { type RequestHandler } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { config } from './config.js';
 import authRoutes from './auth/auth.routes.js';
@@ -33,6 +34,18 @@ export function createApp() {
     res.json({ status: 'ok' });
   });
 
+  // General API rate limiter (disabled in test mode)
+  const apiLimiter: RequestHandler =
+    config.NODE_ENV === 'test'
+      ? (_req, _res, next) => next()
+      : rateLimit({
+          windowMs: 60 * 1000,
+          max: 100,
+          standardHeaders: true,
+          legacyHeaders: false,
+          message: { error: { code: 'RATE_LIMIT', message: 'Too many requests, please try again later' } },
+        });
+
   // API documentation (disabled in test mode)
   if (config.NODE_ENV !== 'test') {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
@@ -40,8 +53,8 @@ export function createApp() {
 
   // Routes
   app.use('/auth', authRoutes);
-  app.use('/api/vehicles', vehicleRoutes);
-  app.use('/api/vehicles/:vehicleId/damages', damageRoutes);
+  app.use('/api/vehicles', apiLimiter, vehicleRoutes);
+  app.use('/api/vehicles/:vehicleId/damages', apiLimiter, damageRoutes);
 
   // Error handler (must be last)
   app.use(errorHandler);
