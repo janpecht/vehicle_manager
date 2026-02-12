@@ -1,0 +1,74 @@
+import { type FormEvent, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthLayout } from './AuthLayout.tsx';
+import { Input } from '../ui/Input.tsx';
+import { Button } from '../ui/Button.tsx';
+import { Alert } from '../ui/Alert.tsx';
+import { useAuthStore } from '../../stores/authStore.ts';
+import * as authService from '../../services/auth.service.ts';
+import type { ApiError } from '../../types/auth.ts';
+import axios from 'axios';
+
+export function LoginPage() {
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const data = await authService.login({ email, password });
+      setAuth(data.user, data.accessToken);
+      navigate('/', { replace: true });
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data) {
+        const apiError = err.response.data as ApiError;
+        setError(apiError.error.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <AuthLayout title="Sprinter Damage Manager" subtitle="Sign in to your account">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <Alert type="error" message={error} />}
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+        />
+        <Input
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
+        <Button type="submit" loading={loading} className="w-full">
+          Sign In
+        </Button>
+        <p className="text-center text-sm text-gray-600">
+          No account?{' '}
+          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            Register
+          </Link>
+        </p>
+      </form>
+    </AuthLayout>
+  );
+}

@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  refreshTokens  RefreshToken[]
+  createdDamages DamageMarking[] @relation("createdDamages")
+  repairedDamages DamageMarking[] @relation("repairedDamages")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  tokenHash String   @unique @map("token_hash")
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Vehicle {
+  id           String   @id @default(uuid()) @db.Uuid
+  licensePlate String   @unique @map("license_plate")
+  label        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  damageMarkings DamageMarking[]
+
+  @@map("vehicles")
+}
+
+enum ViewSide {
+  FRONT
+  REAR
+  LEFT
+  RIGHT
+}
+
+enum Shape {
+  CIRCLE
+  RECTANGLE
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model DamageMarking {
+  id          String    @id @default(uuid()) @db.Uuid
+  vehicleId   String    @map("vehicle_id") @db.Uuid
+  viewSide    ViewSide  @map("view_side")
+  shape       Shape
+  x           Float
+  y           Float
+  width       Float
+  height      Float
+  description String?   @db.VarChar(500)
+  severity    Severity
+  createdAt   DateTime  @default(now()) @map("created_at")
+  createdBy   String    @map("created_by") @db.Uuid
+  repairedAt  DateTime? @map("repaired_at")
+  repairedBy  String?   @map("repaired_by") @db.Uuid
+  isActive    Boolean   @default(true) @map("is_active")
+
+  vehicle     Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  creator     User      @relation("createdDamages", fields: [createdBy], references: [id])
+  repairer    User?     @relation("repairedDamages", fields: [repairedBy], references: [id])
+
+  @@index([vehicleId])
+  @@index([vehicleId, viewSide])
+  @@index([vehicleId, isActive])
+  @@map("damage_markings")
+}
