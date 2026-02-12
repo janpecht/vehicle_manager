@@ -13,7 +13,6 @@ import * as vehicleService from '../../services/vehicle.service.ts';
 import * as damageService from '../../services/damage.service.ts';
 import type { Vehicle } from '../../types/vehicle.ts';
 import type { DamageMarking, CanvasTool, Severity } from '../../types/damage.ts';
-import { DEFAULT_DAMAGE_SIZE } from '../../types/damage.ts';
 import { downloadCanvasAsPng } from '../../utils/exportCanvas.ts';
 import { toast } from 'sonner';
 import type { ApiError } from '../../types/auth.ts';
@@ -31,7 +30,7 @@ export function VehicleDetailPage() {
   // Damage state
   const [damages, setDamages] = useState<DamageMarking[]>([]);
   const [activeTool, setActiveTool] = useState<CanvasTool>('POINTER');
-  const [pendingClick, setPendingClick] = useState<{ x: number; y: number } | null>(null);
+  const [pendingDraw, setPendingDraw] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [selectedDamage, setSelectedDamage] = useState<DamageMarking | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -84,13 +83,13 @@ export function VehicleDetailPage() {
 
   const viewDamages = damages.filter((d) => d.viewSide === activeView);
 
-  function handleCanvasClick(relX: number, relY: number) {
-    setPendingClick({ x: relX, y: relY });
+  function handleCanvasDraw(relX: number, relY: number, relW: number, relH: number) {
+    setPendingDraw({ x: relX, y: relY, width: relW, height: relH });
     setFormDialogOpen(true);
   }
 
   async function handleFormSave(data: { description?: string; severity: Severity }) {
-    if (!id || !pendingClick) return;
+    if (!id || !pendingDraw) return;
 
     setSaving(true);
     try {
@@ -98,16 +97,16 @@ export function VehicleDetailPage() {
       const newDamage = await damageService.createDamage(id, {
         viewSide: activeView,
         shape,
-        x: pendingClick.x,
-        y: pendingClick.y,
-        width: DEFAULT_DAMAGE_SIZE,
-        height: DEFAULT_DAMAGE_SIZE,
+        x: pendingDraw.x,
+        y: pendingDraw.y,
+        width: pendingDraw.width,
+        height: pendingDraw.height,
         description: data.description,
         severity: data.severity,
       });
       setDamages((prev) => [newDamage, ...prev]);
       setFormDialogOpen(false);
-      setPendingClick(null);
+      setPendingDraw(null);
       toast.success('Damage created');
     } catch {
       toast.error('Failed to create damage');
@@ -119,6 +118,23 @@ export function VehicleDetailPage() {
   function handleDamageClick(damage: DamageMarking) {
     setSelectedDamage(damage);
     setDetailOpen(true);
+  }
+
+  async function handleDamageMove(damageId: string, relX: number, relY: number) {
+    if (!id) return;
+
+    // Optimistic update
+    setDamages((prev) =>
+      prev.map((d) => (d.id === damageId ? { ...d, x: relX, y: relY } : d)),
+    );
+
+    try {
+      await damageService.moveDamage(id, damageId, { x: relX, y: relY });
+    } catch {
+      // Revert on failure
+      loadDamages();
+      toast.error('Failed to move damage');
+    }
   }
 
   async function handleDeleteDamage(damageId: string) {
@@ -221,6 +237,9 @@ export function VehicleDetailPage() {
           <Link to={`/vehicles/${id}/report`}>
             <Button variant="secondary">View Report</Button>
           </Link>
+          <Link to={`/report/vehicles/${id}`} target="_blank" rel="noopener noreferrer">
+            <Button variant="primary">Public Link</Button>
+          </Link>
         </div>
       </div>
 
@@ -264,8 +283,9 @@ export function VehicleDetailPage() {
           activeTool={activeTool}
           selectedDamageId={selectedDamage?.id ?? null}
           stageRef={stageRef}
-          onCanvasClick={handleCanvasClick}
+          onCanvasDraw={handleCanvasDraw}
           onDamageClick={handleDamageClick}
+          onDamageMove={handleDamageMove}
         />
       </div>
 
@@ -274,7 +294,7 @@ export function VehicleDetailPage() {
         open={formDialogOpen}
         onClose={() => {
           setFormDialogOpen(false);
-          setPendingClick(null);
+          setPendingDraw(null);
         }}
         onSave={handleFormSave}
         shape={activeTool === 'RECTANGLE' ? 'RECTANGLE' : 'CIRCLE'}

@@ -6,14 +6,31 @@ import type { DamageMarking, CanvasTool } from '../../types/damage.ts';
 import { SEVERITY_COLORS } from '../../types/damage.ts';
 import type Konva from 'konva';
 
+/** Minimum relative size (if drag is smaller, use this as default) */
+const MIN_SIZE = 0.03;
+
 interface SprinterCanvasProps {
   viewSide: ViewSide;
   damages?: DamageMarking[];
   activeTool?: CanvasTool;
   selectedDamageId?: string | null;
   stageRef?: React.RefObject<Konva.Stage | null>;
-  onCanvasClick?: (relativeX: number, relativeY: number) => void;
+  /** Called when user finishes drawing a shape (drag-to-size or click). */
+  onCanvasDraw?: (relX: number, relY: number, relW: number, relH: number) => void;
+  /** @deprecated Use onCanvasDraw instead. Kept for backwards compat (report views). */
+  onCanvasClick?: (relX: number, relY: number) => void;
   onDamageClick?: (damage: DamageMarking) => void;
+  /** Called when a damage marker is dragged to a new position. */
+  onDamageMove?: (damageId: string, relX: number, relY: number) => void;
+}
+
+interface DrawState {
+  /** Relative 0-1 coords of the drag start (one corner) */
+  startX: number;
+  startY: number;
+  /** Relative 0-1 coords of the current pointer (opposite corner) */
+  currentX: number;
+  currentY: number;
 }
 
 export function SprinterCanvas({
@@ -22,11 +39,14 @@ export function SprinterCanvas({
   activeTool = 'POINTER',
   selectedDamageId,
   stageRef,
+  onCanvasDraw,
   onCanvasClick,
   onDamageClick,
+  onDamageMove,
 }: SprinterCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [drawState, setDrawState] = useState<DrawState | null>(null);
 
   const view = getSprinterView(viewSide);
   const { viewBox } = view;
@@ -56,29 +76,135 @@ export function SprinterCanvas({
   const scale = dimensions.width > 0 ? dimensions.width / viewBox.width : 1;
   const isDrawing = activeTool === 'CIRCLE' || activeTool === 'RECTANGLE';
 
-  function handleStagePointer(e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
-    if (!isDrawing || !onCanvasClick) return;
+  function pointerToRel(stage: Konva.Stage): { relX: number; relY: number } | null {
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return null;
+    return {
+      relX: Math.max(0, Math.min(1, pointer.x / scale / viewBox.width)),
+      relY: Math.max(0, Math.min(1, pointer.y / scale / viewBox.height)),
+    };
+  }
+
+  function handleDrawStart(e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
+    if (!isDrawing) return;
 
     const stage = e.target.getStage();
     if (!stage) return;
 
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
+    const pos = pointerToRel(stage);
+    if (!pos) return;
 
-    // Convert pixel coords to viewBox coords, then to relative 0-1
-    const relX = pointer.x / scale / viewBox.width;
-    const relY = pointer.y / scale / viewBox.height;
+    setDrawState({
+      startX: pos.relX,
+      startY: pos.relY,
+      currentX: pos.relX,
+      currentY: pos.relY,
+    });
+  }
 
-    onCanvasClick(
-      Math.max(0, Math.min(1, relX)),
-      Math.max(0, Math.min(1, relY)),
+  function handleDrawMove(e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
+    if (!drawState) return;
+
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    const pos = pointerToRel(stage);
+    if (!pos) return;
+
+    setDrawState((prev) =>
+      prev ? { ...prev, currentX: pos.relX, currentY: pos.relY } : null,
     );
   }
+
+  function handleDrawEnd() {
+    if (!drawState) return;
+
+    const { startX, startY, currentX, currentY } = drawState;
+    setDrawState(null);
+
+    let relW = Math.abs(currentX - startX);
+    let relH = Math.abs(currentY - startY);
+    let centerX: number;
+    let centerY: number;
+
+    // If drag was very small (just a click), use minimum size
+    if (relW < MIN_SIZE && relH < MIN_SIZE) {
+      relW = MIN_SIZE;
+      relH = MIN_SIZE;
+      centerX = startX;
+      centerY = startY;
+    } else {
+      // For circles: use the larger dimension for both
+      if (activeTool === 'CIRCLE') {
+        const maxDim = Math.max(relW, relH);
+        relW = maxDim;
+        relH = maxDim;
+      }
+      centerX = (startX + currentX) / 2;
+      centerY = (startY + currentY) / 2;
+    }
+
+    if (onCanvasDraw) {
+      onCanvasDraw(centerX, centerY, relW, relH);
+    } else if (onCanvasClick) {
+      onCanvasClick(centerX, centerY);
+    }
+  }
+
+  const canDrag = activeTool === 'POINTER' && !!onDamageMove;
 
   function handleDamagePointer(damage: DamageMarking, e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
     e.cancelBubble = true;
     onDamageClick?.(damage);
   }
+
+  function handleDamageDragEnd(damage: DamageMarking, e: Konva.KonvaEventObject<DragEvent>) {
+    if (!onDamageMove) return;
+    const node = e.target;
+
+    // node position is in viewBox coords; for rects it's the top-left corner
+    let absX = node.x();
+    let absY = node.y();
+
+    // Rectangles are positioned at top-left, convert to center
+    if (damage.shape === 'RECTANGLE') {
+      const absW = damage.width * viewBox.width;
+      const absH = damage.height * viewBox.height;
+      absX += absW / 2;
+      absY += absH / 2;
+    }
+
+    const relX = Math.max(0, Math.min(1, absX / viewBox.width));
+    const relY = Math.max(0, Math.min(1, absY / viewBox.height));
+    onDamageMove(damage.id, relX, relY);
+  }
+
+  // Compute preview shape geometry in viewBox coordinates
+  function getPreviewGeometry() {
+    if (!drawState) return null;
+
+    const { startX, startY, currentX, currentY } = drawState;
+    let relW = Math.abs(currentX - startX);
+    let relH = Math.abs(currentY - startY);
+
+    if (activeTool === 'CIRCLE') {
+      const maxDim = Math.max(relW, relH);
+      relW = maxDim;
+      relH = maxDim;
+    }
+
+    const centerX = (startX + currentX) / 2;
+    const centerY = (startY + currentY) / 2;
+
+    return {
+      absX: centerX * viewBox.width,
+      absY: centerY * viewBox.height,
+      absW: Math.max(relW, 0.005) * viewBox.width,
+      absH: Math.max(relH, 0.005) * viewBox.height,
+    };
+  }
+
+  const preview = getPreviewGeometry();
 
   return (
     <div
@@ -93,8 +219,12 @@ export function SprinterCanvas({
           height={dimensions.height}
           scaleX={scale}
           scaleY={scale}
-          onClick={handleStagePointer}
-          onTap={handleStagePointer}
+          onMouseDown={handleDrawStart}
+          onTouchStart={handleDrawStart}
+          onMouseMove={handleDrawMove}
+          onTouchMove={handleDrawMove}
+          onMouseUp={handleDrawEnd}
+          onTouchEnd={handleDrawEnd}
         >
           <Layer>
             {/* Background */}
@@ -147,8 +277,10 @@ export function SprinterCanvas({
                     stroke={isSelected ? '#000000' : color}
                     strokeWidth={isSelected ? 2 : 1}
                     dash={dash}
+                    draggable={canDrag}
                     onClick={(e) => handleDamagePointer(damage, e)}
                     onTap={(e) => handleDamagePointer(damage, e)}
+                    onDragEnd={(e) => handleDamageDragEnd(damage, e)}
                     data-damage-id={damage.id}
                   />
                 );
@@ -166,12 +298,43 @@ export function SprinterCanvas({
                   stroke={isSelected ? '#000000' : color}
                   strokeWidth={isSelected ? 2 : 1}
                   dash={dash}
+                  draggable={canDrag}
                   onClick={(e) => handleDamagePointer(damage, e)}
                   onTap={(e) => handleDamagePointer(damage, e)}
+                  onDragEnd={(e) => handleDamageDragEnd(damage, e)}
                   data-damage-id={damage.id}
                 />
               );
             })}
+
+            {/* Draw preview */}
+            {preview && activeTool === 'CIRCLE' && (
+              <Circle
+                x={preview.absX}
+                y={preview.absY}
+                radius={Math.max(preview.absW, preview.absH) / 2}
+                fill="#3b82f6"
+                opacity={0.3}
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dash={[6, 3]}
+                listening={false}
+              />
+            )}
+            {preview && activeTool === 'RECTANGLE' && (
+              <Rect
+                x={preview.absX - preview.absW / 2}
+                y={preview.absY - preview.absH / 2}
+                width={preview.absW}
+                height={preview.absH}
+                fill="#3b82f6"
+                opacity={0.3}
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dash={[6, 3]}
+                listening={false}
+              />
+            )}
           </Layer>
         </Stage>
       )}

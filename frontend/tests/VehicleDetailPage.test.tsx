@@ -21,16 +21,18 @@ vi.mock('../src/services/damage.service.ts', () => ({
   createDamage: vi.fn(),
   deleteDamage: vi.fn(),
   repairDamage: vi.fn(),
+  moveDamage: vi.fn(),
 }));
 
 // Mock Konva components — canvas doesn't work in happy-dom
 vi.mock('react-konva', () => ({
-  Stage: ({ children, onClick, ...props }: Record<string, unknown>) => (
+  Stage: ({ children, onMouseDown, onMouseUp, ...props }: Record<string, unknown>) => (
     <div
       data-testid="konva-stage"
       data-width={props.width}
       data-height={props.height}
-      onClick={onClick as React.MouseEventHandler}
+      onMouseDown={onMouseDown as React.MouseEventHandler}
+      onMouseUp={onMouseUp as React.MouseEventHandler}
     >
       {children as React.ReactNode}
     </div>
