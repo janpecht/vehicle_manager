@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
-import type { CreateDamageInput, DamageQuery } from './damages.schemas.js';
+import type { CreateDamageInput, UpdateDamagePositionInput, DamageQuery } from './damages.schemas.js';
 
 const prisma = new PrismaClient();
 
@@ -54,6 +54,17 @@ export async function getDamage(damageId: string) {
     throw new NotFoundError('Damage marking not found');
   }
   return damage;
+}
+
+export async function updateDamagePosition(damageId: string, input: UpdateDamagePositionInput) {
+  const damage = await prisma.damageMarking.findUnique({ where: { id: damageId } });
+  if (!damage) {
+    throw new NotFoundError('Damage marking not found');
+  }
+  return prisma.damageMarking.update({
+    where: { id: damageId },
+    data: { x: input.x, y: input.y },
+  });
 }
 
 export async function deleteDamage(damageId: string) {

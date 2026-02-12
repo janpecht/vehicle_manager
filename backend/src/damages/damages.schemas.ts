@@ -23,5 +23,11 @@ export const damageQuerySchema = z.object({
     .default('true'),
 });
 
+export const updateDamagePositionSchema = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+});
+
 export type CreateDamageInput = z.infer<typeof createDamageSchema>;
+export type UpdateDamagePositionInput = z.infer<typeof updateDamagePositionSchema>;
 export type DamageQuery = z.infer<typeof damageQuerySchema>;

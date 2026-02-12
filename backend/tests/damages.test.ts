@@ -455,6 +455,68 @@ describe('DELETE /api/vehicles/:vehicleId/damages/:damageId', () => {
   });
 });
 
+describe('PATCH /api/vehicles/:vehicleId/damages/:damageId (move)', () => {
+  it('should update damage position', async () => {
+    const createRes = await request(app)
+      .post(damageUrl())
+      .set(authHeader())
+      .send(validDamage);
+    const damageId = createRes.body.damage.id;
+
+    const res = await request(app)
+      .patch(`${damageUrl()}/${damageId}`)
+      .set(authHeader())
+      .send({ x: 0.8, y: 0.9 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.damage.x).toBe(0.8);
+    expect(res.body.damage.y).toBe(0.9);
+    // Other fields should remain unchanged
+    expect(res.body.damage.width).toBe(validDamage.width);
+    expect(res.body.damage.height).toBe(validDamage.height);
+    expect(res.body.damage.description).toBe(validDamage.description);
+  });
+
+  it('should reject invalid coordinates', async () => {
+    const createRes = await request(app)
+      .post(damageUrl())
+      .set(authHeader())
+      .send(validDamage);
+    const damageId = createRes.body.damage.id;
+
+    const res = await request(app)
+      .patch(`${damageUrl()}/${damageId}`)
+      .set(authHeader())
+      .send({ x: 1.5, y: -0.1 });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('should return 404 for non-existent damage', async () => {
+    const fakeId = '00000000-0000-0000-0000-000000000000';
+    const res = await request(app)
+      .patch(`${damageUrl()}/${fakeId}`)
+      .set(authHeader())
+      .send({ x: 0.5, y: 0.5 });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('should return 401 without auth', async () => {
+    const createRes = await request(app)
+      .post(damageUrl())
+      .set(authHeader())
+      .send(validDamage);
+    const damageId = createRes.body.damage.id;
+
+    const res = await request(app)
+      .patch(`${damageUrl()}/${damageId}`)
+      .send({ x: 0.5, y: 0.5 });
+
+    expect(res.status).toBe(401);
+  });
+});
+
 describe('PATCH /api/vehicles/:vehicleId/damages/:damageId/repair', () => {
   function repairUrl(damageId: string, vId = vehicleId) {
     return `${damageUrl(vId)}/${damageId}/repair`;

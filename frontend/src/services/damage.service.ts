@@ -40,6 +40,18 @@ export async function deleteDamage(
   await api.delete(`/api/vehicles/${vehicleId}/damages/${damageId}`);
 }
 
+export async function moveDamage(
+  vehicleId: string,
+  damageId: string,
+  position: { x: number; y: number },
+): Promise<DamageMarking> {
+  const { data } = await api.patch<{ damage: DamageMarking }>(
+    `/api/vehicles/${vehicleId}/damages/${damageId}`,
+    position,
+  );
+  return data.damage;
+}
+
 export async function repairDamage(
   vehicleId: string,
   damageId: string,
