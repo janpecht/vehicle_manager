@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type Konva from 'konva';
 import { Skeleton } from '../ui/Skeleton.tsx';
@@ -10,13 +10,10 @@ import { DamageFormDialog } from '../damage-canvas/DamageFormDialog.tsx';
 import { DamageDetailPopup } from '../damage-canvas/DamageDetailPopup.tsx';
 import { ALL_VIEWS, VIEW_LABELS, type ViewSide } from '../damage-canvas/sprinterSvgPaths.ts';
 import * as vehicleService from '../../services/vehicle.service.ts';
-import * as damageService from '../../services/damage.service.ts';
 import type { Vehicle } from '../../types/vehicle.ts';
-import type { DamageMarking, CanvasTool, Severity } from '../../types/damage.ts';
 import { downloadCanvasAsPng } from '../../utils/exportCanvas.ts';
-import { toast } from 'sonner';
-import type { ApiError } from '../../types/auth.ts';
-import axios from 'axios';
+import { isNotFoundError, getApiErrorMessage } from '../../utils/apiError.ts';
+import { useDamageManager } from '../../hooks/useDamageManager.ts';
 
 export function VehicleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,19 +23,19 @@ export function VehicleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeView, setActiveView] = useState<ViewSide>('LEFT');
-
-  // Damage state
-  const [damages, setDamages] = useState<DamageMarking[]>([]);
-  const [activeTool, setActiveTool] = useState<CanvasTool>('POINTER');
-  const [pendingDraw, setPendingDraw] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [selectedDamage, setSelectedDamage] = useState<DamageMarking | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [showRepaired, setShowRepaired] = useState(false);
-  const [repairLoading, setRepairLoading] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
+
+  const dm = useDamageManager(id, !!vehicle);
+  const viewDamages = dm.damages.filter((d) => d.viewSide === activeView);
+
+  // Resolve custom background image from vehicle type
+  const VIEW_IMAGE_MAP: Record<string, 'frontImage' | 'rearImage' | 'leftImage' | 'rightImage'> = {
+    FRONT: 'frontImage',
+    REAR: 'rearImage',
+    LEFT: 'leftImage',
+    RIGHT: 'rightImage',
+  };
+  const bgImageUrl = vehicle?.vehicleType?.[VIEW_IMAGE_MAP[activeView]] ?? undefined;
 
   useEffect(() => {
     if (!id) return;
@@ -50,12 +47,10 @@ export function VehicleDetailPage() {
         const v = await vehicleService.getVehicle(id!);
         setVehicle(v);
       } catch (err) {
-        if (axios.isAxiosError(err) && err.response?.status === 404) {
+        if (isNotFoundError(err)) {
           setError('Vehicle not found');
-        } else if (axios.isAxiosError(err) && err.response?.data) {
-          setError((err.response.data as ApiError).error.message);
         } else {
-          setError('Failed to load vehicle');
+          setError(getApiErrorMessage(err, 'Failed to load vehicle'));
         }
       } finally {
         setLoading(false);
@@ -64,112 +59,6 @@ export function VehicleDetailPage() {
 
     fetchVehicle();
   }, [id]);
-
-  const loadDamages = useCallback(async () => {
-    if (!id) return;
-    try {
-      const data = await damageService.listDamages(id, { activeOnly: !showRepaired });
-      setDamages(data);
-    } catch {
-      // Silently fail — damages are secondary to vehicle view
-    }
-  }, [id, showRepaired]);
-
-  useEffect(() => {
-    if (vehicle) {
-      loadDamages();
-    }
-  }, [vehicle, loadDamages]);
-
-  const viewDamages = damages.filter((d) => d.viewSide === activeView);
-
-  function handleCanvasDraw(relX: number, relY: number, relW: number, relH: number) {
-    setPendingDraw({ x: relX, y: relY, width: relW, height: relH });
-    setFormDialogOpen(true);
-  }
-
-  async function handleFormSave(data: { description?: string; severity: Severity }) {
-    if (!id || !pendingDraw) return;
-
-    setSaving(true);
-    try {
-      const shape = activeTool === 'CIRCLE' ? 'CIRCLE' : 'RECTANGLE';
-      const newDamage = await damageService.createDamage(id, {
-        viewSide: activeView,
-        shape,
-        x: pendingDraw.x,
-        y: pendingDraw.y,
-        width: pendingDraw.width,
-        height: pendingDraw.height,
-        description: data.description,
-        severity: data.severity,
-      });
-      setDamages((prev) => [newDamage, ...prev]);
-      setFormDialogOpen(false);
-      setPendingDraw(null);
-      toast.success('Damage created');
-    } catch {
-      toast.error('Failed to create damage');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function handleDamageClick(damage: DamageMarking) {
-    setSelectedDamage(damage);
-    setDetailOpen(true);
-  }
-
-  async function handleDamageMove(damageId: string, relX: number, relY: number) {
-    if (!id) return;
-
-    // Optimistic update
-    setDamages((prev) =>
-      prev.map((d) => (d.id === damageId ? { ...d, x: relX, y: relY } : d)),
-    );
-
-    try {
-      await damageService.moveDamage(id, damageId, { x: relX, y: relY });
-    } catch {
-      // Revert on failure
-      loadDamages();
-      toast.error('Failed to move damage');
-    }
-  }
-
-  async function handleDeleteDamage(damageId: string) {
-    if (!id) return;
-
-    setDeleteLoading(true);
-    try {
-      await damageService.deleteDamage(id, damageId);
-      setDamages((prev) => prev.filter((d) => d.id !== damageId));
-      setDetailOpen(false);
-      setSelectedDamage(null);
-      toast.success('Damage deleted');
-    } catch {
-      toast.error('Failed to delete damage');
-    } finally {
-      setDeleteLoading(false);
-    }
-  }
-
-  async function handleRepairDamage(damageId: string) {
-    if (!id) return;
-
-    setRepairLoading(true);
-    try {
-      const updated = await damageService.repairDamage(id, damageId);
-      setDamages((prev) => prev.map((d) => (d.id === damageId ? updated : d)));
-      setDetailOpen(false);
-      setSelectedDamage(null);
-      toast.success('Damage marked as repaired');
-    } catch {
-      toast.error('Failed to mark damage as repaired');
-    } finally {
-      setRepairLoading(false);
-    }
-  }
 
   function handleExportPng() {
     if (!stageRef.current || !vehicle) return;
@@ -228,6 +117,16 @@ export function VehicleDetailPage() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{vehicle.licensePlate}</h2>
             {vehicle.label && <p className="text-sm text-gray-500">{vehicle.label}</p>}
+            {vehicle.formLink && (
+              <a
+                href={vehicle.formLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:text-blue-500 hover:underline"
+              >
+                Damage Report Form
+              </a>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -267,11 +166,11 @@ export function VehicleDetailPage() {
       {/* Toolbar */}
       <div className="mb-4">
         <DamageToolbar
-          activeTool={activeTool}
-          onToolChange={setActiveTool}
+          activeTool={dm.activeTool}
+          onToolChange={dm.setActiveTool}
           damageCount={viewDamages.length}
-          showRepaired={showRepaired}
-          onShowRepairedChange={setShowRepaired}
+          showRepaired={dm.showRepaired}
+          onShowRepairedChange={dm.setShowRepaired}
         />
       </div>
 
@@ -280,39 +179,34 @@ export function VehicleDetailPage() {
         <SprinterCanvas
           viewSide={activeView}
           damages={viewDamages}
-          activeTool={activeTool}
-          selectedDamageId={selectedDamage?.id ?? null}
+          activeTool={dm.activeTool}
+          selectedDamageId={dm.selectedDamage?.id ?? null}
           stageRef={stageRef}
-          onCanvasDraw={handleCanvasDraw}
-          onDamageClick={handleDamageClick}
-          onDamageMove={handleDamageMove}
+          backgroundImageUrl={bgImageUrl}
+          onCanvasDraw={dm.handleCanvasDraw}
+          onDamageClick={dm.handleDamageClick}
+          onDamageMove={dm.handleDamageMove}
         />
       </div>
 
       {/* Form Dialog */}
       <DamageFormDialog
-        open={formDialogOpen}
-        onClose={() => {
-          setFormDialogOpen(false);
-          setPendingDraw(null);
-        }}
-        onSave={handleFormSave}
-        shape={activeTool === 'RECTANGLE' ? 'RECTANGLE' : 'CIRCLE'}
-        loading={saving}
+        open={dm.formDialogOpen}
+        onClose={dm.closeFormDialog}
+        onSave={(data) => dm.handleFormSave(activeView, data)}
+        shape={dm.activeTool === 'RECTANGLE' ? 'RECTANGLE' : 'CIRCLE'}
+        loading={dm.saving}
       />
 
       {/* Detail Popup */}
       <DamageDetailPopup
-        open={detailOpen}
-        onClose={() => {
-          setDetailOpen(false);
-          setSelectedDamage(null);
-        }}
-        onDelete={handleDeleteDamage}
-        onRepair={handleRepairDamage}
-        damage={selectedDamage}
-        deleteLoading={deleteLoading}
-        repairLoading={repairLoading}
+        open={dm.detailOpen}
+        onClose={dm.closeDetailPopup}
+        onDelete={dm.handleDeleteDamage}
+        onRepair={dm.handleRepairDamage}
+        damage={dm.selectedDamage}
+        deleteLoading={dm.deleteLoading}
+        repairLoading={dm.repairLoading}
       />
     </div>
   );

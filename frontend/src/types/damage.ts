@@ -1,7 +1,7 @@
 export type ViewSide = 'FRONT' | 'REAR' | 'LEFT' | 'RIGHT';
 export type Shape = 'CIRCLE' | 'RECTANGLE';
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH';
-export type CanvasTool = 'POINTER' | 'CIRCLE' | 'RECTANGLE';
+export type CanvasTool = 'CIRCLE' | 'RECTANGLE';
 
 export interface DamageMarking {
   id: string;

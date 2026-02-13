@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Modal } from '../ui/Modal.tsx';
 import { Button } from '../ui/Button.tsx';
 import { ConfirmDialog } from '../ui/ConfirmDialog.tsx';
+import { SeverityBadge } from '../ui/SeverityBadge.tsx';
 import type { DamageMarking } from '../../types/damage.ts';
-import { SEVERITY_COLORS, SEVERITY_LABELS } from '../../types/damage.ts';
 
 interface DamageDetailPopupProps {
   open: boolean;
@@ -29,7 +29,6 @@ export function DamageDetailPopup({
 
   if (!damage) return null;
 
-  const severityColor = SEVERITY_COLORS[damage.severity];
   const isRepaired = !damage.isActive;
 
   return (
@@ -37,12 +36,7 @@ export function DamageDetailPopup({
       <Modal open={open} onClose={onClose} title="Damage Details">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span
-              className="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
-              style={{ backgroundColor: severityColor }}
-            >
-              {SEVERITY_LABELS[damage.severity]}
-            </span>
+            <SeverityBadge severity={damage.severity} />
             <span className="text-sm text-gray-500">{damage.shape}</span>
             {isRepaired && (
               <span className="inline-block rounded-full bg-gray-400 px-2.5 py-0.5 text-xs font-semibold text-white">

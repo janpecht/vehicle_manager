@@ -8,8 +8,7 @@ import { VehicleDialog } from './VehicleDialog.tsx';
 import * as vehicleService from '../../services/vehicle.service.ts';
 import type { Vehicle, PaginatedVehicles } from '../../types/vehicle.ts';
 import { toast } from 'sonner';
-import type { ApiError } from '../../types/auth.ts';
-import axios from 'axios';
+import { getApiErrorMessage } from '../../utils/apiError.ts';
 
 export function VehicleListPage() {
   const navigate = useNavigate();
@@ -38,11 +37,7 @@ export function VehicleListPage() {
       });
       setData(result);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        setError((err.response.data as ApiError).error.message);
-      } else {
-        setError('Failed to load vehicles');
-      }
+      setError(getApiErrorMessage(err, 'Failed to load vehicles'));
     } finally {
       setLoading(false);
     }
@@ -82,11 +77,7 @@ export function VehicleListPage() {
       toast.success('Vehicle deleted');
       fetchVehicles();
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        setError((err.response.data as ApiError).error.message);
-      } else {
-        setError('Failed to delete vehicle');
-      }
+      setError(getApiErrorMessage(err, 'Failed to delete vehicle'));
     } finally {
       setDeleting(false);
     }

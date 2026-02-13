@@ -1,13 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../src/app.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-const app = createApp();
+import { prisma, app } from './helpers.ts';
 
 const testUser = {
-  email: 'authtest@test.de',
+  email: 'authtest@dieeisfabrik.de',
   password: 'Test1234',
   name: 'Auth Test User',
 };
@@ -93,6 +89,23 @@ describe('POST /auth/register', () => {
 
     expect(res.status).toBe(400);
   });
+
+  it('should reject non-dieeisfabrik.de email domain', async () => {
+    const res = await request(app)
+      .post('/auth/register')
+      .send({ ...testUser, email: 'user@gmail.com' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('should reject other company email domains', async () => {
+    const res = await request(app)
+      .post('/auth/register')
+      .send({ ...testUser, email: 'user@example.com' });
+
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('POST /auth/login', () => {
@@ -123,7 +136,7 @@ describe('POST /auth/login', () => {
   it('should reject unknown email', async () => {
     const res = await request(app)
       .post('/auth/login')
-      .send({ email: 'unknown@test.de', password: testUser.password });
+      .send({ email: 'unknown@dieeisfabrik.de', password: testUser.password });
 
     expect(res.status).toBe(401);
     expect(res.body.error.message).toBe('Invalid email or password');

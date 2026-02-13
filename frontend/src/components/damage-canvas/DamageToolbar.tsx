@@ -9,7 +9,6 @@ interface DamageToolbarProps {
 }
 
 const TOOLS: Array<{ value: CanvasTool; label: string }> = [
-  { value: 'POINTER', label: 'Pointer' },
   { value: 'CIRCLE', label: 'Circle' },
   { value: 'RECTANGLE', label: 'Rectangle' },
 ];

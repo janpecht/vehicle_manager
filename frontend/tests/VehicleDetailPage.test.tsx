@@ -25,66 +25,11 @@ vi.mock('../src/services/damage.service.ts', () => ({
 }));
 
 // Mock Konva components — canvas doesn't work in happy-dom
-vi.mock('react-konva', () => ({
-  Stage: ({ children, onMouseDown, onMouseUp, ...props }: Record<string, unknown>) => (
-    <div
-      data-testid="konva-stage"
-      data-width={props.width}
-      data-height={props.height}
-      onMouseDown={onMouseDown as React.MouseEventHandler}
-      onMouseUp={onMouseUp as React.MouseEventHandler}
-    >
-      {children as React.ReactNode}
-    </div>
-  ),
-  Layer: ({ children }: { children: React.ReactNode }) => <div data-testid="konva-layer">{children}</div>,
-  Path: (props: Record<string, unknown>) => <div data-testid="konva-path" data-fill={props.fill} />,
-  Rect: ({ onClick, ...props }: Record<string, unknown>) => (
-    <div
-      data-testid="konva-rect"
-      data-fill={props.fill}
-      data-damage-id={props['data-damage-id'] as string}
-      onClick={onClick as React.MouseEventHandler}
-    />
-  ),
-  Circle: ({ onClick, ...props }: Record<string, unknown>) => (
-    <div
-      data-testid="konva-circle"
-      data-fill={props.fill}
-      data-damage-id={props['data-damage-id'] as string}
-      onClick={onClick as React.MouseEventHandler}
-    />
-  ),
-}));
+vi.mock('react-konva', () => import('./mocks/konva.tsx'));
 
 import * as vehicleService from '../src/services/vehicle.service.ts';
 import * as damageService from '../src/services/damage.service.ts';
-
-const mockVehicle = {
-  id: 'v1',
-  licensePlate: 'HD-AB 1234',
-  label: 'Sprinter 1',
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedAt: '2026-01-01T00:00:00Z',
-};
-
-const mockDamage = {
-  id: 'd1',
-  vehicleId: 'v1',
-  viewSide: 'LEFT' as const,
-  shape: 'CIRCLE' as const,
-  x: 0.5,
-  y: 0.3,
-  width: 0.05,
-  height: 0.05,
-  description: 'Scratch on door',
-  severity: 'MEDIUM' as const,
-  createdAt: '2026-01-15T00:00:00Z',
-  createdBy: '1',
-  repairedAt: null,
-  repairedBy: null,
-  isActive: true,
-};
+import { mockVehicle, mockDamage } from './fixtures.ts';
 
 function renderDetailPage(vehicleId = 'v1') {
   useAuthStore.setState({
@@ -229,7 +174,6 @@ describe('VehicleDetailPage', () => {
       expect(screen.getByText('HD-AB 1234')).toBeInTheDocument();
     });
 
-    expect(screen.getByRole('button', { name: 'Pointer' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Circle' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Rectangle' })).toBeInTheDocument();
   });
@@ -272,10 +216,10 @@ describe('VehicleDetailPage', () => {
       expect(screen.getByText('HD-AB 1234')).toBeInTheDocument();
     });
 
-    // Switch to circle tool
-    await user.click(screen.getByRole('button', { name: 'Circle' }));
-
-    // Click the stage (simulated)
+    // Circle tool is the default, wait for stage to render then click
+    await waitFor(() => {
+      expect(screen.getByTestId('konva-stage')).toBeInTheDocument();
+    });
     await user.click(screen.getByTestId('konva-stage'));
 
     // Note: The mock doesn't provide getStage/getPointerPosition so the click handler

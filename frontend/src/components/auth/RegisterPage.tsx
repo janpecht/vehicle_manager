@@ -72,6 +72,9 @@ export function RegisterPage() {
           required
           autoComplete="email"
         />
+        <p className="text-xs text-gray-500">
+          Nur @dieeisfabrik.de E-Mail-Adressen erlaubt
+        </p>
         <Input
           label="Password"
           type="password"

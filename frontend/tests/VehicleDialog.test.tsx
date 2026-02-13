@@ -14,6 +14,10 @@ vi.mock('../src/services/vehicle.service.ts', () => ({
   updateVehicle: vi.fn(),
 }));
 
+vi.mock('../src/services/vehicleType.service.ts', () => ({
+  listVehicleTypes: vi.fn().mockResolvedValue([]),
+}));
+
 import * as vehicleService from '../src/services/vehicle.service.ts';
 
 const defaultProps = {
@@ -51,6 +55,9 @@ describe('VehicleDialog', () => {
         id: '1',
         licensePlate: 'HD-AB 1234',
         label: 'Sprinter 1',
+        formLink: null,
+        vehicleTypeId: null,
+        vehicleType: null,
         createdAt: '2026-01-01',
         updatedAt: '2026-01-01',
       },
@@ -68,6 +75,9 @@ describe('VehicleDialog', () => {
       id: '1',
       licensePlate: 'HD-AB 1234',
       label: 'Test',
+      formLink: null,
+      vehicleTypeId: null,
+      vehicleType: null,
       createdAt: '2026-01-01',
       updatedAt: '2026-01-01',
     });
@@ -82,6 +92,8 @@ describe('VehicleDialog', () => {
       expect(vehicleService.createVehicle).toHaveBeenCalledWith({
         licensePlate: 'HD-AB 1234',
         label: 'Test',
+        formLink: undefined,
+        vehicleTypeId: undefined,
       });
       expect(defaultProps.onSaved).toHaveBeenCalled();
     });
@@ -93,6 +105,9 @@ describe('VehicleDialog', () => {
       id: '1',
       licensePlate: 'HD-AB 1234',
       label: 'Updated',
+      formLink: null,
+      vehicleTypeId: null,
+      vehicleType: null,
       createdAt: '2026-01-01',
       updatedAt: '2026-01-01',
     });
@@ -102,6 +117,9 @@ describe('VehicleDialog', () => {
         id: '1',
         licensePlate: 'HD-AB 1234',
         label: 'Old',
+        formLink: null,
+        vehicleTypeId: null,
+        vehicleType: null,
         createdAt: '2026-01-01',
         updatedAt: '2026-01-01',
       },
@@ -116,6 +134,8 @@ describe('VehicleDialog', () => {
       expect(vehicleService.updateVehicle).toHaveBeenCalledWith('1', {
         licensePlate: 'HD-AB 1234',
         label: 'Updated',
+        formLink: null,
+        vehicleTypeId: null,
       });
       expect(defaultProps.onSaved).toHaveBeenCalled();
     });

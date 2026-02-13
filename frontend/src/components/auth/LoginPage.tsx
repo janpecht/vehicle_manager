@@ -6,8 +6,7 @@ import { Button } from '../ui/Button.tsx';
 import { Alert } from '../ui/Alert.tsx';
 import { useAuthStore } from '../../stores/authStore.ts';
 import * as authService from '../../services/auth.service.ts';
-import type { ApiError } from '../../types/auth.ts';
-import axios from 'axios';
+import { getApiErrorMessage } from '../../utils/apiError.ts';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -28,12 +27,7 @@ export function LoginPage() {
       setAuth(data.user, data.accessToken);
       navigate('/', { replace: true });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        const apiError = err.response.data as ApiError;
-        setError(apiError.error.message);
-      } else {
-        setError('An unexpected error occurred');
-      }
+      setError(getApiErrorMessage(err, 'An unexpected error occurred'));
     } finally {
       setLoading(false);
     }

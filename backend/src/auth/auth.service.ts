@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { AuthError, ConflictError } from '../utils/errors.js';
 import {
@@ -9,8 +9,6 @@ import {
   getRefreshTokenExpiresAt,
 } from '../utils/tokens.js';
 import type { RegisterInput, LoginInput } from './auth.schemas.js';
-
-const prisma = new PrismaClient();
 
 export interface AuthTokens {
   accessToken: string;
@@ -119,5 +117,3 @@ export async function getMe(userId: string): Promise<UserResponse> {
   return toUserResponse(user);
 }
 
-/** Exposed for testing — allows injecting a different PrismaClient */
-export { prisma };

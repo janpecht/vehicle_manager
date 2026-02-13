@@ -42,13 +42,31 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-model Vehicle {
-  id           String   @id @default(uuid()) @db.Uuid
-  licensePlate String   @unique @map("license_plate")
-  label        String?
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+model VehicleType {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String   @unique
+  frontImage String?  @map("front_image")
+  rearImage  String?  @map("rear_image")
+  leftImage  String?  @map("left_image")
+  rightImage String?  @map("right_image")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
+  vehicles Vehicle[]
+
+  @@map("vehicle_types")
+}
+
+model Vehicle {
+  id            String   @id @default(uuid()) @db.Uuid
+  licensePlate  String   @unique @map("license_plate")
+  label         String?
+  formLink      String?  @map("form_link")
+  vehicleTypeId String?  @map("vehicle_type_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  vehicleType    VehicleType?    @relation(fields: [vehicleTypeId], references: [id])
   damageMarkings DamageMarking[]
 
   @@map("vehicles")

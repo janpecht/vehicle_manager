@@ -2,20 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { LoadingSpinner } from '../ui/LoadingSpinner.tsx';
 import { Alert } from '../ui/Alert.tsx';
 import { SprinterCanvas } from './SprinterCanvas.tsx';
-import { ALL_VIEWS, VIEW_LABELS } from './sprinterSvgPaths.ts';
+import { DamageTable } from './DamageTable.tsx';
+import { ALL_VIEWS, VIEW_LABELS, VIEW_ORDER } from './sprinterSvgPaths.ts';
 import * as vehicleService from '../../services/vehicle.service.ts';
 import * as damageService from '../../services/damage.service.ts';
 import type { Vehicle } from '../../types/vehicle.ts';
 import type { DamageMarking } from '../../types/damage.ts';
-import { SEVERITY_COLORS, SEVERITY_LABELS } from '../../types/damage.ts';
-import type { ApiError } from '../../types/auth.ts';
-import axios from 'axios';
+import { isNotFoundError, getApiErrorMessage } from '../../utils/apiError.ts';
 
 interface DamageReportProps {
   vehicleId: string;
 }
-
-const VIEW_ORDER = { FRONT: 0, REAR: 1, LEFT: 2, RIGHT: 3 } as const;
 
 export function DamageReport({ vehicleId }: DamageReportProps) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
@@ -34,12 +31,10 @@ export function DamageReport({ vehicleId }: DamageReportProps) {
       setVehicle(v);
       setDamages(d);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
+      if (isNotFoundError(err)) {
         setError('Vehicle not found');
-      } else if (axios.isAxiosError(err) && err.response?.data) {
-        setError((err.response.data as ApiError).error.message);
       } else {
-        setError('Failed to load report data');
+        setError(getApiErrorMessage(err, 'Failed to load report data'));
       }
     } finally {
       setLoading(false);
@@ -105,47 +100,7 @@ export function DamageReport({ vehicleId }: DamageReportProps) {
         {sortedDamages.length === 0 ? (
           <p className="text-sm text-gray-500">No damages recorded for this vehicle.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b text-xs uppercase text-gray-500">
-                  <th className="pb-2 pr-4">View</th>
-                  <th className="pb-2 pr-4">Shape</th>
-                  <th className="pb-2 pr-4">Severity</th>
-                  <th className="pb-2 pr-4">Description</th>
-                  <th className="pb-2 pr-4">Status</th>
-                  <th className="pb-2">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedDamages.map((damage) => (
-                  <tr key={damage.id} className="border-b last:border-0">
-                    <td className="py-2 pr-4">{VIEW_LABELS[damage.viewSide]}</td>
-                    <td className="py-2 pr-4">{damage.shape}</td>
-                    <td className="py-2 pr-4">
-                      <span
-                        className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold text-white"
-                        style={{ backgroundColor: SEVERITY_COLORS[damage.severity] }}
-                      >
-                        {SEVERITY_LABELS[damage.severity]}
-                      </span>
-                    </td>
-                    <td className="py-2 pr-4 max-w-48 truncate">{damage.description ?? '—'}</td>
-                    <td className="py-2 pr-4">
-                      {damage.isActive ? (
-                        <span className="text-green-600 font-medium">Active</span>
-                      ) : (
-                        <span className="text-gray-400">Repaired</span>
-                      )}
-                    </td>
-                    <td className="py-2 text-gray-500">
-                      {new Date(damage.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DamageTable damages={sortedDamages} showStatus />
         )}
       </div>
     </div>

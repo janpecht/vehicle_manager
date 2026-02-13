@@ -435,3 +435,5 @@ export const VIEW_LABELS: Record<ViewSide, string> = {
 };
 
 export const ALL_VIEWS: ViewSide[] = ['FRONT', 'REAR', 'LEFT', 'RIGHT'];
+
+export const VIEW_ORDER: Record<ViewSide, number> = { FRONT: 0, REAR: 1, LEFT: 2, RIGHT: 3 };

@@ -1,10 +1,29 @@
 import type React from 'react';
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Stage, Layer, Path, Rect, Circle } from 'react-konva';
+import { Stage, Layer, Path, Rect, Circle, Image as KonvaImage } from 'react-konva';
 import { getSprinterView, type ViewSide } from './sprinterSvgPaths.ts';
 import type { DamageMarking, CanvasTool } from '../../types/damage.ts';
 import { SEVERITY_COLORS } from '../../types/damage.ts';
 import type Konva from 'konva';
+
+/** Hook to load an HTMLImageElement from a URL */
+function useImage(url: string | undefined): HTMLImageElement | null {
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (!url) {
+      setImage(null);
+      return;
+    }
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => setImage(img);
+    img.onerror = () => setImage(null);
+    img.src = url;
+  }, [url]);
+
+  return image;
+}
 
 /** Minimum relative size (if drag is smaller, use this as default) */
 const MIN_SIZE = 0.03;
@@ -15,6 +34,8 @@ interface SprinterCanvasProps {
   activeTool?: CanvasTool;
   selectedDamageId?: string | null;
   stageRef?: React.RefObject<Konva.Stage | null>;
+  /** URL for a custom background image (replaces the default SVG silhouette). */
+  backgroundImageUrl?: string;
   /** Called when user finishes drawing a shape (drag-to-size or click). */
   onCanvasDraw?: (relX: number, relY: number, relW: number, relH: number) => void;
   /** @deprecated Use onCanvasDraw instead. Kept for backwards compat (report views). */
@@ -36,9 +57,10 @@ interface DrawState {
 export function SprinterCanvas({
   viewSide,
   damages = [],
-  activeTool = 'POINTER',
+  activeTool = 'CIRCLE',
   selectedDamageId,
   stageRef,
+  backgroundImageUrl,
   onCanvasDraw,
   onCanvasClick,
   onDamageClick,
@@ -48,6 +70,7 @@ export function SprinterCanvas({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [drawState, setDrawState] = useState<DrawState | null>(null);
 
+  const bgImage = useImage(backgroundImageUrl);
   const view = getSprinterView(viewSide);
   const { viewBox } = view;
   const aspectRatio = viewBox.width / viewBox.height;
@@ -151,7 +174,7 @@ export function SprinterCanvas({
     }
   }
 
-  const canDrag = activeTool === 'POINTER' && !!onDamageMove;
+  const canDrag = !!onDamageMove;
 
   function handleDamagePointer(damage: DamageMarking, e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
     e.cancelBubble = true;
@@ -236,19 +259,32 @@ export function SprinterCanvas({
               fill="#f0f4f8"
             />
 
-            {/* Van body */}
-            <Path data={view.bodyPath} fill="#d1d5db" stroke="#6b7280" strokeWidth={2} />
-
-            {/* Detail elements */}
-            {view.details.map((detail, i) => (
-              <Path
-                key={i}
-                data={detail.path}
-                fill={detail.fill ?? 'none'}
-                stroke={detail.stroke ?? 'none'}
-                strokeWidth={detail.stroke ? 1.5 : 0}
+            {bgImage ? (
+              /* Custom background image from vehicle type */
+              <KonvaImage
+                image={bgImage}
+                x={0}
+                y={0}
+                width={viewBox.width}
+                height={viewBox.height}
               />
-            ))}
+            ) : (
+              <>
+                {/* Default SVG van body */}
+                <Path data={view.bodyPath} fill="#d1d5db" stroke="#6b7280" strokeWidth={2} />
+
+                {/* Detail elements */}
+                {view.details.map((detail, i) => (
+                  <Path
+                    key={i}
+                    data={detail.path}
+                    fill={detail.fill ?? 'none'}
+                    stroke={detail.stroke ?? 'none'}
+                    strokeWidth={detail.stroke ? 1.5 : 0}
+                  />
+                ))}
+              </>
+            )}
           </Layer>
 
           {/* Damage markers layer */}
@@ -257,8 +293,11 @@ export function SprinterCanvas({
               const color = SEVERITY_COLORS[damage.severity];
               const isSelected = damage.id === selectedDamageId;
               const isRepaired = !damage.isActive;
-              const opacity = isRepaired ? 0.2 : 0.5;
-              const dash = isRepaired ? [4, 4] : undefined;
+              const fillColor = isRepaired ? 'transparent' : color;
+              const opacity = isRepaired ? 1 : 0.5;
+              const dash = isRepaired ? [6, 4] : undefined;
+              const strokeColor = isSelected ? '#000000' : color;
+              const strokeW = isSelected ? 2 : isRepaired ? 2 : 1;
               const absX = damage.x * viewBox.width;
               const absY = damage.y * viewBox.height;
               const absW = damage.width * viewBox.width;
@@ -272,10 +311,10 @@ export function SprinterCanvas({
                     x={absX}
                     y={absY}
                     radius={radius}
-                    fill={color}
+                    fill={fillColor}
                     opacity={opacity}
-                    stroke={isSelected ? '#000000' : color}
-                    strokeWidth={isSelected ? 2 : 1}
+                    stroke={strokeColor}
+                    strokeWidth={strokeW}
                     dash={dash}
                     draggable={canDrag}
                     onClick={(e) => handleDamagePointer(damage, e)}
@@ -293,10 +332,10 @@ export function SprinterCanvas({
                   y={absY - absH / 2}
                   width={absW}
                   height={absH}
-                  fill={color}
+                  fill={fillColor}
                   opacity={opacity}
-                  stroke={isSelected ? '#000000' : color}
-                  strokeWidth={isSelected ? 2 : 1}
+                  stroke={strokeColor}
+                  strokeWidth={strokeW}
                   dash={dash}
                   draggable={canDrag}
                   onClick={(e) => handleDamagePointer(damage, e)}

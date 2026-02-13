@@ -5,7 +5,7 @@ import { DamageToolbar } from '../src/components/damage-canvas/DamageToolbar.tsx
 
 function renderToolbar(overrides?: Partial<Parameters<typeof DamageToolbar>[0]>) {
   const defaults = {
-    activeTool: 'POINTER' as const,
+    activeTool: 'CIRCLE' as const,
     onToolChange: vi.fn(),
     damageCount: 0,
     showRepaired: false,
@@ -16,10 +16,9 @@ function renderToolbar(overrides?: Partial<Parameters<typeof DamageToolbar>[0]>)
 }
 
 describe('DamageToolbar', () => {
-  it('should render all three tool buttons', () => {
+  it('should render Circle and Rectangle tool buttons', () => {
     renderToolbar();
 
-    expect(screen.getByRole('button', { name: 'Pointer' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Circle' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Rectangle' })).toBeInTheDocument();
   });
@@ -28,7 +27,7 @@ describe('DamageToolbar', () => {
     renderToolbar({ activeTool: 'CIRCLE' });
 
     expect(screen.getByRole('button', { name: 'Circle' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Pointer' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Rectangle' })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('should call onToolChange when clicking a tool', async () => {
