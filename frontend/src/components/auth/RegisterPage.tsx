@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout.tsx';
 import { Input } from '../ui/Input.tsx';
@@ -19,6 +19,13 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [allowedDomain, setAllowedDomain] = useState<string | null>(null);
+
+  useEffect(() => {
+    axios.get<{ allowedEmailDomain: string }>('/public/config')
+      .then((res) => setAllowedDomain(res.data.allowedEmailDomain))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -72,9 +79,11 @@ export function RegisterPage() {
           required
           autoComplete="email"
         />
-        <p className="text-xs text-gray-500">
-          Nur @dieeisfabrik.de E-Mail-Adressen erlaubt
-        </p>
+        {allowedDomain && (
+          <p className="text-xs text-gray-500">
+            Nur @{allowedDomain} E-Mail-Adressen erlaubt
+          </p>
+        )}
         <Input
           label="Passwort"
           type="password"

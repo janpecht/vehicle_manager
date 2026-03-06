@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { config } from '../config.js';
 
 export const registerSchema = z.object({
   email: z.string().email('Invalid email address').refine(
-    (val) => val.endsWith('@dieeisfabrik.de'),
-    { message: 'Registration is only allowed for @dieeisfabrik.de email addresses' },
+    (val) => val.endsWith(`@${config.ALLOWED_EMAIL_DOMAIN}`),
+    { message: `Registration is only allowed for @${config.ALLOWED_EMAIL_DOMAIN} email addresses` },
   ),
   password: z
     .string()

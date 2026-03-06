@@ -19,6 +19,9 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   CHECKLIST_NOTIFY_EMAIL: z.string().email().optional(),
+
+  // Restrict registration to this email domain (e.g. "example.com")
+  ALLOWED_EMAIL_DOMAIN: z.string().min(1, 'ALLOWED_EMAIL_DOMAIN is required (e.g. "example.com")'),
 });
 
 function loadConfig() {

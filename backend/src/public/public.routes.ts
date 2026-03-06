@@ -9,8 +9,14 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { getIdParam } from '../utils/params.js';
 import { sendChecklistNotification } from '../utils/email.js';
 import { upload } from '../utils/upload.js';
+import { config } from '../config.js';
 
 const router = Router();
+
+/** GET /public/config — public app config (allowed email domain etc.) */
+router.get('/config', (_req, res) => {
+  res.json({ allowedEmailDomain: config.ALLOWED_EMAIL_DOMAIN });
+});
 
 /** GET /public/vehicles/:id/report — public, no auth required */
 router.get('/vehicles/:id/report', asyncHandler(async (req, res) => {

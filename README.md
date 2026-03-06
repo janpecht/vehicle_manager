@@ -14,7 +14,7 @@ A web application for documenting and tracking damage on a fleet of delivery van
 
 ## Features
 
-- **Authentication**: Register (restricted to @dieeisfabrik.de emails), login, JWT access/refresh token flow
+- **Authentication**: Register (restricted to configurable email domain), login, JWT access/refresh token flow
 - **Vehicle Management**: CRUD with German license plate validation, search, vehicle types with custom images
 - **4-Side Damage View**: Interactive Konva.js canvas with front, rear, left, right views (custom vehicle type images supported)
 - **Damage Marking**: Draw circles or rectangles via drag, set severity (low/medium/high), add descriptions, drag to reposition
@@ -57,6 +57,7 @@ POSTGRES_DB=sprinter_damage_db
 JWT_ACCESS_SECRET=your-access-secret-min-32-characters-long!!
 JWT_REFRESH_SECRET=your-refresh-secret-min-32-characters-long!!
 CORS_ORIGIN=http://your-domain:5173
+ALLOWED_EMAIL_DOMAIN=example.com
 EOF
 ```
 
@@ -73,7 +74,7 @@ This will:
 
 ### 4. Create the first admin user
 
-Register via the frontend at `http://your-server:5173/register` (email must end with `@dieeisfabrik.de`).
+Register via the frontend at `http://your-server:5173/register` (email must match the domain set in `ALLOWED_EMAIL_DOMAIN`).
 
 ### Access
 
@@ -101,6 +102,7 @@ All backend environment variables are passed via `docker-compose.yml` or a root 
 | `PORT` | No | Backend server port | `3001` |
 | `NODE_ENV` | No | `development`, `production`, or `test` | `development` |
 | `CORS_ORIGIN` | Yes | Allowed frontend origin URL (must match where frontend is served) | `http://localhost:5173` |
+| `ALLOWED_EMAIL_DOMAIN` | Yes | Only emails from this domain can register (e.g. `example.com`) | — |
 | `SMTP_HOST` | No | SMTP server for checklist email notifications | — |
 | `SMTP_PORT` | No | SMTP port | `587` |
 | `SMTP_SECURE` | No | Use TLS (`true`/`false`) | `false` |
