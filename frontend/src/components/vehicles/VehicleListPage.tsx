@@ -22,9 +22,13 @@ export function VehicleListPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
 
+  // Inactive filter
+  const [showInactive, setShowInactive] = useState(false);
+
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState<Vehicle | null>(null);
   const [deleting, setDeleting] = useState(false);
+
 
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
@@ -32,16 +36,17 @@ export function VehicleListPage() {
     try {
       const result = await vehicleService.listVehicles({
         search: search || undefined,
+        includeInactive: showInactive,
         page,
         limit: 20,
       });
       setData(result);
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Failed to load vehicles'));
+      setError(getApiErrorMessage(err, 'Fehler beim Laden der Fahrzeuge'));
     } finally {
       setLoading(false);
     }
-  }, [search, page]);
+  }, [search, showInactive, page]);
 
   useEffect(() => {
     fetchVehicles();
@@ -68,16 +73,26 @@ export function VehicleListPage() {
     fetchVehicles();
   }
 
+  async function toggleActive(vehicle: Vehicle) {
+    try {
+      await vehicleService.updateVehicle(vehicle.id, { isActive: !vehicle.isActive });
+      toast.success(vehicle.isActive ? 'Fahrzeug deaktiviert' : 'Fahrzeug aktiviert');
+      fetchVehicles();
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Fehler beim Aktualisieren'));
+    }
+  }
+
   async function handleDelete() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
       await vehicleService.deleteVehicle(deleteTarget.id);
       setDeleteTarget(null);
-      toast.success('Vehicle deleted');
+      toast.success('Fahrzeug gelöscht');
       fetchVehicles();
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Failed to delete vehicle'));
+      setError(getApiErrorMessage(err, 'Fehler beim Löschen'));
     } finally {
       setDeleting(false);
     }
@@ -86,19 +101,28 @@ export function VehicleListPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Vehicles</h2>
-        <Button onClick={openAddDialog}>Add Vehicle</Button>
+        <h2 className="text-xl font-semibold text-gray-900">Fahrzeuge</h2>
+        <Button onClick={openAddDialog}>Fahrzeug hinzufügen</Button>
       </div>
 
-      {/* Search */}
-      <div className="mb-4">
+      {/* Search + inactive toggle */}
+      <div className="mb-4 flex flex-wrap items-center gap-4">
         <input
           type="text"
-          placeholder="Search by license plate or label..."
+          placeholder="Nach Kennzeichen oder Bezeichnung suchen..."
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
           className="w-full max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        <label className="flex items-center gap-2 text-sm text-gray-600">
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) => { setShowInactive(e.target.checked); setPage(1); }}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600"
+          />
+          Inaktive anzeigen
+        </label>
       </div>
 
       {error && (
@@ -139,7 +163,7 @@ export function VehicleListPage() {
       {data && data.vehicles.length === 0 && (
         <div className="rounded-lg bg-white p-8 text-center shadow">
           <p className="text-gray-500">
-            {search ? 'No vehicles match your search.' : 'No vehicles yet. Add your first vehicle.'}
+            {search ? 'Keine Fahrzeuge gefunden.' : 'Noch keine Fahrzeuge vorhanden. Füge dein erstes Fahrzeug hinzu.'}
           </p>
         </div>
       )}
@@ -151,22 +175,28 @@ export function VehicleListPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  License Plate
+                  Kennzeichen
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Label
+                  Bezeichnung
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Created
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  km-Stand
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Erstellt
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Actions
+                  Aktionen
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {data.vehicles.map((vehicle) => (
-                <tr key={vehicle.id} className="hover:bg-gray-50">
+                <tr key={vehicle.id} className={`hover:bg-gray-50 ${!vehicle.isActive ? 'opacity-50' : ''}`}>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                     <button
                       onClick={() => navigate(`/vehicles/${vehicle.id}`)}
@@ -178,6 +208,16 @@ export function VehicleListPage() {
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {vehicle.label || '-'}
                   </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm">
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${vehicle.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {vehicle.isActive ? 'Aktiv' : 'Inaktiv'}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {vehicle.checklistSubmissions?.[0]?.mileage != null
+                      ? vehicle.checklistSubmissions[0].mileage.toLocaleString('de-DE') + ' km'
+                      : '-'}
+                  </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {new Date(vehicle.createdAt).toLocaleDateString('de-DE')}
                   </td>
@@ -186,19 +226,25 @@ export function VehicleListPage() {
                       onClick={() => navigate(`/vehicles/${vehicle.id}`)}
                       className="mr-3 font-medium text-blue-600 hover:text-blue-500"
                     >
-                      View
+                      Anzeigen
                     </button>
                     <button
                       onClick={() => openEditDialog(vehicle)}
                       className="mr-3 font-medium text-blue-600 hover:text-blue-500"
                     >
-                      Edit
+                      Bearbeiten
+                    </button>
+                    <button
+                      onClick={() => toggleActive(vehicle)}
+                      className={`mr-3 font-medium ${vehicle.isActive ? 'text-yellow-600 hover:text-yellow-500' : 'text-green-600 hover:text-green-500'}`}
+                    >
+                      {vehicle.isActive ? 'Deaktivieren' : 'Aktivieren'}
                     </button>
                     <button
                       onClick={() => setDeleteTarget(vehicle)}
                       className="font-medium text-red-600 hover:text-red-500"
                     >
-                      Delete
+                      Löschen
                     </button>
                   </td>
                 </tr>
@@ -210,7 +256,7 @@ export function VehicleListPage() {
           {data.totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-3">
               <span className="text-sm text-gray-700">
-                Page {data.page} of {data.totalPages} ({data.total} vehicles)
+                Seite {data.page} von {data.totalPages} ({data.total} Fahrzeuge)
               </span>
               <div className="flex gap-2">
                 <Button
@@ -218,14 +264,14 @@ export function VehicleListPage() {
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                 >
-                  Previous
+                  Zurück
                 </Button>
                 <Button
                   variant="secondary"
                   onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
                   disabled={page >= data.totalPages}
                 >
-                  Next
+                  Weiter
                 </Button>
               </div>
             </div>
@@ -249,8 +295,8 @@ export function VehicleListPage() {
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Delete Vehicle"
-        message={`Are you sure you want to delete vehicle "${deleteTarget?.licensePlate}"? This action cannot be undone.`}
+        title="Fahrzeug löschen"
+        message={`Möchtest du das Fahrzeug "${deleteTarget?.licensePlate}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
         loading={deleting}
       />
     </div>

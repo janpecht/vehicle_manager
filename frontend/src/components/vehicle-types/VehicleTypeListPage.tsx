@@ -11,10 +11,10 @@ import { getApiErrorMessage } from '../../utils/apiError.ts';
 
 const SIDES = ['front', 'rear', 'left', 'right'] as const;
 const SIDE_LABELS: Record<(typeof SIDES)[number], string> = {
-  front: 'Front',
-  rear: 'Rear',
-  left: 'Left',
-  right: 'Right',
+  front: 'Vorne',
+  rear: 'Hinten',
+  left: 'Links',
+  right: 'Rechts',
 };
 const SIDE_FIELD_MAP: Record<(typeof SIDES)[number], keyof VehicleType> = {
   front: 'frontImage',
@@ -50,7 +50,7 @@ export function VehicleTypeListPage() {
       setVehicleTypes(types);
       setError('');
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Failed to load vehicle types'));
+      setError(getApiErrorMessage(err, 'Fehler beim Laden der Fahrzeugtypen'));
     } finally {
       setLoading(false);
     }
@@ -82,15 +82,15 @@ export function VehicleTypeListPage() {
     try {
       if (editingType) {
         await vehicleTypeService.updateVehicleType(editingType.id, typeName);
-        toast.success('Vehicle type updated');
+        toast.success('Fahrzeugtyp aktualisiert');
       } else {
         await vehicleTypeService.createVehicleType(typeName);
-        toast.success('Vehicle type created');
+        toast.success('Fahrzeugtyp erstellt');
       }
       setDialogOpen(false);
       loadTypes();
     } catch (err) {
-      setDialogError(getApiErrorMessage(err, 'Failed to save vehicle type'));
+      setDialogError(getApiErrorMessage(err, 'Fehler beim Speichern'));
     } finally {
       setSaving(false);
     }
@@ -101,11 +101,11 @@ export function VehicleTypeListPage() {
     setDeleteLoading(true);
     try {
       await vehicleTypeService.deleteVehicleType(deleteId);
-      toast.success('Vehicle type deleted');
+      toast.success('Fahrzeugtyp gelöscht');
       setDeleteId(null);
       loadTypes();
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Failed to delete vehicle type'));
+      toast.error(getApiErrorMessage(err, 'Fehler beim Löschen'));
     } finally {
       setDeleteLoading(false);
     }
@@ -116,10 +116,10 @@ export function VehicleTypeListPage() {
     setUploadingSide(side);
     try {
       await vehicleTypeService.uploadVehicleTypeImage(vtId, side, file);
-      toast.success(`${SIDE_LABELS[side]} image uploaded`);
+      toast.success(`${SIDE_LABELS[side]}-Bild hochgeladen`);
       loadTypes();
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Failed to upload image'));
+      toast.error(getApiErrorMessage(err, 'Fehler beim Hochladen'));
     } finally {
       setUploadingId(null);
       setUploadingSide(null);
@@ -144,15 +144,15 @@ export function VehicleTypeListPage() {
     <div>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Vehicle Types</h1>
-        <Button onClick={openCreateDialog}>Add Vehicle Type</Button>
+        <h1 className="text-2xl font-bold text-gray-900">Fahrzeugtypen</h1>
+        <Button onClick={openCreateDialog}>Fahrzeugtyp hinzufügen</Button>
       </div>
 
       {error && <Alert type="error" message={error} />}
 
       {vehicleTypes.length === 0 && !error && (
         <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-          <p className="text-gray-500">No vehicle types yet. Add one to get started.</p>
+          <p className="text-gray-500">Noch keine Fahrzeugtypen vorhanden. Erstelle einen, um loszulegen.</p>
         </div>
       )}
 
@@ -164,10 +164,10 @@ export function VehicleTypeListPage() {
               <h3 className="text-lg font-semibold text-gray-900">{vt.name}</h3>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => openEditDialog(vt)}>
-                  Edit
+                  Bearbeiten
                 </Button>
                 <Button variant="danger" onClick={() => setDeleteId(vt.id)}>
-                  Delete
+                  Löschen
                 </Button>
               </div>
             </div>
@@ -189,11 +189,11 @@ export function VehicleTypeListPage() {
                           className="h-full w-full object-contain"
                         />
                       ) : (
-                        <span className="text-xs text-gray-400">No image</span>
+                        <span className="text-xs text-gray-400">Kein Bild</span>
                       )}
                     </div>
                     <label className="cursor-pointer text-xs text-blue-600 hover:text-blue-500">
-                      {isUploading ? 'Uploading...' : 'Upload'}
+                      {isUploading ? 'Lädt hoch...' : 'Hochladen'}
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/svg+xml"
@@ -218,7 +218,7 @@ export function VehicleTypeListPage() {
       <Modal
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        title={editingType ? 'Edit Vehicle Type' : 'Add Vehicle Type'}
+        title={editingType ? 'Fahrzeugtyp bearbeiten' : 'Fahrzeugtyp hinzufügen'}
       >
         <form onSubmit={handleDialogSubmit} className="space-y-4">
           {dialogError && <Alert type="error" message={dialogError} />}
@@ -232,26 +232,26 @@ export function VehicleTypeListPage() {
           />
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" type="button" onClick={() => setDialogOpen(false)} disabled={saving}>
-              Cancel
+              Abbrechen
             </Button>
             <Button type="submit" loading={saving}>
-              {editingType ? 'Save Changes' : 'Add Type'}
+              {editingType ? 'Speichern' : 'Hinzufügen'}
             </Button>
           </div>
         </form>
       </Modal>
 
       {/* Delete confirmation */}
-      <Modal open={!!deleteId} onClose={() => setDeleteId(null)} title="Delete Vehicle Type">
+      <Modal open={!!deleteId} onClose={() => setDeleteId(null)} title="Fahrzeugtyp löschen">
         <p className="mb-4 text-gray-600">
-          Are you sure you want to delete this vehicle type? Vehicles using this type will no longer have a type assigned.
+          Möchtest du diesen Fahrzeugtyp wirklich löschen? Fahrzeuge mit diesem Typ haben danach keinen Typ mehr zugewiesen.
         </p>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={() => setDeleteId(null)} disabled={deleteLoading}>
-            Cancel
+            Abbrechen
           </Button>
           <Button variant="danger" onClick={handleDelete} loading={deleteLoading}>
-            Delete
+            Löschen
           </Button>
         </div>
       </Modal>

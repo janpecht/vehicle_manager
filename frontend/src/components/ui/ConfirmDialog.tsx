@@ -17,7 +17,7 @@ export function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmLabel = 'Delete',
+  confirmLabel = 'Löschen',
   loading,
 }: ConfirmDialogProps) {
   return (
@@ -25,7 +25,7 @@ export function ConfirmDialog({
       <p className="mb-6 text-sm text-gray-600">{message}</p>
       <div className="flex justify-end gap-3">
         <Button variant="secondary" onClick={onClose} disabled={loading}>
-          Cancel
+          Abbrechen
         </Button>
         <Button variant="danger" onClick={onConfirm} loading={loading}>
           {confirmLabel}

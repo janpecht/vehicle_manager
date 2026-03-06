@@ -62,9 +62,9 @@ export function useDamageManager(vehicleId: string | undefined, vehicleLoaded: b
       setDamages((prev) => [newDamage, ...prev]);
       setFormDialogOpen(false);
       setPendingDraw(null);
-      toast.success('Damage created');
+      toast.success('Schaden erstellt');
     } catch {
-      toast.error('Failed to create damage');
+      toast.error('Fehler beim Erstellen des Schadens');
     } finally {
       setSaving(false);
     }
@@ -86,7 +86,7 @@ export function useDamageManager(vehicleId: string | undefined, vehicleLoaded: b
       await damageService.moveDamage(vehicleId, damageId, { x: relX, y: relY });
     } catch {
       loadDamages();
-      toast.error('Failed to move damage');
+      toast.error('Fehler beim Verschieben des Schadens');
     }
   }
 
@@ -99,9 +99,9 @@ export function useDamageManager(vehicleId: string | undefined, vehicleLoaded: b
       setDamages((prev) => prev.filter((d) => d.id !== damageId));
       setDetailOpen(false);
       setSelectedDamage(null);
-      toast.success('Damage deleted');
+      toast.success('Schaden gelöscht');
     } catch {
-      toast.error('Failed to delete damage');
+      toast.error('Fehler beim Löschen des Schadens');
     } finally {
       setDeleteLoading(false);
     }
@@ -116,9 +116,9 @@ export function useDamageManager(vehicleId: string | undefined, vehicleLoaded: b
       setDamages((prev) => prev.map((d) => (d.id === damageId ? updated : d)));
       setDetailOpen(false);
       setSelectedDamage(null);
-      toast.success('Damage marked as repaired');
+      toast.success('Schaden als repariert markiert');
     } catch {
-      toast.error('Failed to mark damage as repaired');
+      toast.error('Fehler beim Markieren als repariert');
     } finally {
       setRepairLoading(false);
     }

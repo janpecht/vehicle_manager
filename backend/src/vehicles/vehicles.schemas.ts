@@ -38,10 +38,12 @@ export const updateVehicleSchema = z.object({
   label: z.string().max(100, 'Label is too long').nullable().optional(),
   formLink: z.string().url('Invalid URL format').optional().or(z.literal('')).nullable(),
   vehicleTypeId: z.string().uuid('Invalid vehicle type ID').optional().nullable(),
+  isActive: z.boolean().optional(),
 });
 
 export const vehicleQuerySchema = z.object({
   search: z.string().optional(),
+  includeInactive: z.coerce.boolean().default(false),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
 });

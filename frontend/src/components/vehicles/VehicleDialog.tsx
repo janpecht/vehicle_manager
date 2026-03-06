@@ -63,7 +63,7 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
           vehicleTypeId: vehicleTypeId || undefined,
         });
       }
-      toast.success(isEdit ? 'Vehicle updated' : 'Vehicle added');
+      toast.success(isEdit ? 'Fahrzeug aktualisiert' : 'Fahrzeug hinzugefügt');
       onSaved();
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
@@ -78,7 +78,7 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
           setError(apiError.error.message);
         }
       } else {
-        setError('An unexpected error occurred');
+        setError('Ein unerwarteter Fehler ist aufgetreten');
       }
     } finally {
       setLoading(false);
@@ -86,28 +86,28 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={isEdit ? 'Edit Vehicle' : 'Add Vehicle'}>
+    <Modal open={open} onClose={onClose} title={isEdit ? 'Fahrzeug bearbeiten' : 'Fahrzeug hinzufügen'}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <Alert type="error" message={error} />}
         <Input
-          label="License Plate"
+          label="Kennzeichen"
           type="text"
           value={licensePlate}
           onChange={(e) => setLicensePlate(e.target.value)}
           error={fieldErrors['licensePlate']}
-          placeholder="e.g. HD-AB 1234"
+          placeholder="z.B. HD-AB 1234"
           required
         />
         <Input
-          label="Label (optional)"
+          label="Bezeichnung (optional)"
           type="text"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           error={fieldErrors['label']}
-          placeholder="e.g. Sprinter #1"
+          placeholder="z.B. Sprinter #1"
         />
         <Input
-          label="Form Link (optional)"
+          label="Formular-Link (optional)"
           type="url"
           value={formLink}
           onChange={(e) => setFormLink(e.target.value)}
@@ -116,14 +116,14 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
         />
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            Vehicle Type (optional)
+            Fahrzeugtyp (optional)
           </label>
           <select
             value={vehicleTypeId}
             onChange={(e) => setVehicleTypeId(e.target.value)}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option value="">No type</option>
+            <option value="">Kein Typ</option>
             {vehicleTypes.map((vt) => (
               <option key={vt.id} value={vt.id}>
                 {vt.name}
@@ -133,10 +133,10 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
         </div>
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
-            Cancel
+            Abbrechen
           </Button>
           <Button type="submit" loading={loading}>
-            {isEdit ? 'Save Changes' : 'Add Vehicle'}
+            {isEdit ? 'Speichern' : 'Hinzufügen'}
           </Button>
         </div>
       </form>

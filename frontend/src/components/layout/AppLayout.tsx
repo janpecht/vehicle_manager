@@ -23,27 +23,39 @@ export function AppLayout() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-6">
             <Link to="/" className="text-lg font-semibold text-gray-900 hover:text-gray-700">
-              Sprinter Damage Manager
+              Fahrzeugmanager
             </Link>
             <nav className="flex gap-4">
               <Link
                 to="/"
                 className={`text-sm font-medium ${location.pathname === '/' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                Vehicles
+                Fahrzeuge
               </Link>
               <Link
                 to="/vehicle-types"
                 className={`text-sm font-medium ${location.pathname === '/vehicle-types' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                Vehicle Types
+                Fahrzeugtypen
+              </Link>
+              <Link
+                to="/drivers"
+                className={`text-sm font-medium ${location.pathname === '/drivers' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                Fahrer
+              </Link>
+              <Link
+                to="/checklists"
+                className={`text-sm font-medium ${location.pathname === '/checklists' ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                Checklisten
               </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">{user?.name}</span>
             <Button variant="secondary" onClick={handleLogout}>
-              Logout
+              Abmelden
             </Button>
           </div>
         </div>

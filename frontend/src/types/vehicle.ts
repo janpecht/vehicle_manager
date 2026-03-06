@@ -16,8 +16,10 @@ export interface Vehicle {
   formLink: string | null;
   vehicleTypeId: string | null;
   vehicleType: VehicleType | null;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  checklistSubmissions?: { mileage: number; submittedAt: string }[];
 }
 
 export interface PaginatedVehicles {
@@ -40,4 +42,5 @@ export interface UpdateVehicleInput {
   label?: string | null;
   formLink?: string | null;
   vehicleTypeId?: string | null;
+  isActive?: boolean;
 }

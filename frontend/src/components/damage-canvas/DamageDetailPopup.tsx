@@ -33,14 +33,14 @@ export function DamageDetailPopup({
 
   return (
     <>
-      <Modal open={open} onClose={onClose} title="Damage Details">
+      <Modal open={open} onClose={onClose} title="Schadensdetails">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <SeverityBadge severity={damage.severity} />
-            <span className="text-sm text-gray-500">{damage.shape}</span>
+            <span className="text-sm text-gray-500">{damage.shape === 'CIRCLE' ? 'Kreis' : 'Rechteck'}</span>
             {isRepaired && (
               <span className="inline-block rounded-full bg-gray-400 px-2.5 py-0.5 text-xs font-semibold text-white">
-                Repaired
+                Repariert
               </span>
             )}
           </div>
@@ -50,12 +50,12 @@ export function DamageDetailPopup({
           )}
 
           <p className="text-xs text-gray-500">
-            Created: {new Date(damage.createdAt).toLocaleDateString()}
+            Erstellt: {new Date(damage.createdAt).toLocaleDateString('de-DE')}
           </p>
 
           {isRepaired && damage.repairedAt && (
             <p className="text-xs text-gray-500">
-              Repaired: {new Date(damage.repairedAt).toLocaleDateString()}
+              Repariert: {new Date(damage.repairedAt).toLocaleDateString('de-DE')}
             </p>
           )}
         </div>
@@ -64,17 +64,17 @@ export function DamageDetailPopup({
           {damage.isActive ? (
             <div className="flex gap-2">
               <Button variant="danger" onClick={() => setConfirmDeleteOpen(true)} disabled={deleteLoading || repairLoading}>
-                Delete
+                Löschen
               </Button>
               <Button variant="secondary" onClick={() => setConfirmRepairOpen(true)} disabled={deleteLoading || repairLoading}>
-                Mark as Repaired
+                Als repariert markieren
               </Button>
             </div>
           ) : (
             <div />
           )}
           <Button variant="secondary" onClick={onClose}>
-            Close
+            Schließen
           </Button>
         </div>
       </Modal>
@@ -86,8 +86,8 @@ export function DamageDetailPopup({
           setConfirmDeleteOpen(false);
           onDelete(damage.id);
         }}
-        title="Delete Damage"
-        message="Are you sure you want to delete this damage marking? This action cannot be undone."
+        title="Schaden löschen"
+        message="Möchtest du diesen Schaden wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
         loading={deleteLoading}
       />
 
@@ -98,9 +98,9 @@ export function DamageDetailPopup({
           setConfirmRepairOpen(false);
           onRepair(damage.id);
         }}
-        title="Mark as Repaired"
-        message="Mark this damage as repaired? It will be visually subdued on the canvas."
-        confirmLabel="Confirm"
+        title="Als repariert markieren"
+        message="Diesen Schaden als repariert markieren? Er wird auf der Grafik abgeblendet dargestellt."
+        confirmLabel="Bestätigen"
         loading={repairLoading}
       />
     </>

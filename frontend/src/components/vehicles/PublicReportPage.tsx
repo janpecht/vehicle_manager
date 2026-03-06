@@ -8,7 +8,15 @@ import { ALL_VIEWS, VIEW_LABELS, VIEW_ORDER } from '../damage-canvas/sprinterSvg
 import * as publicService from '../../services/public.service.ts';
 import { isNotFoundError } from '../../utils/apiError.ts';
 import type { Vehicle } from '../../types/vehicle.ts';
-import type { DamageMarking } from '../../types/damage.ts';
+import type { DamageMarking, ViewSide } from '../../types/damage.ts';
+import type { VehicleType } from '../../types/vehicle.ts';
+
+const VIEW_IMAGE_KEY: Record<ViewSide, keyof VehicleType> = {
+  FRONT: 'frontImage',
+  REAR: 'rearImage',
+  LEFT: 'leftImage',
+  RIGHT: 'rightImage',
+};
 
 export function PublicReportPage() {
   const { id } = useParams<{ id: string }>();
@@ -94,7 +102,13 @@ export function PublicReportPage() {
                 <h2 className="mb-2 text-sm font-semibold text-gray-700 sm:text-base">
                   {VIEW_LABELS[view]}
                 </h2>
-                <SprinterCanvas viewSide={view} damages={viewDamages} />
+                <SprinterCanvas
+                  viewSide={view}
+                  damages={viewDamages}
+                  backgroundImageUrl={
+                    (vehicle.vehicleType?.[VIEW_IMAGE_KEY[view]] as string | null) ?? undefined
+                  }
+                />
                 <p className="mt-1 text-xs text-gray-500">
                   {viewDamages.length} {viewDamages.length === 1 ? 'Schaden' : 'Schäden'}
                 </p>

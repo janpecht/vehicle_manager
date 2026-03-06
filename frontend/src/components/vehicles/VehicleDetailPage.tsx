@@ -48,9 +48,9 @@ export function VehicleDetailPage() {
         setVehicle(v);
       } catch (err) {
         if (isNotFoundError(err)) {
-          setError('Vehicle not found');
+          setError('Fahrzeug nicht gefunden');
         } else {
-          setError(getApiErrorMessage(err, 'Failed to load vehicle'));
+          setError(getApiErrorMessage(err, 'Fehler beim Laden des Fahrzeugs'));
         }
       } finally {
         setLoading(false);
@@ -98,7 +98,7 @@ export function VehicleDetailPage() {
       <div className="space-y-4">
         <Alert type="error" message={error} />
         <Button variant="secondary" onClick={() => navigate('/')}>
-          Back to Vehicles
+          Zurück zur Übersicht
         </Button>
       </div>
     );
@@ -112,7 +112,7 @@ export function VehicleDetailPage() {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="secondary" onClick={() => navigate('/')}>
-            &larr; Back
+            &larr; Zurück
           </Button>
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{vehicle.licensePlate}</h2>
@@ -124,20 +124,20 @@ export function VehicleDetailPage() {
                 rel="noopener noreferrer"
                 className="text-sm text-blue-600 hover:text-blue-500 hover:underline"
               >
-                Damage Report Form
+                Schadensformular
               </a>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={handleExportPng}>
-            Export PNG
+            PNG exportieren
           </Button>
           <Link to={`/vehicles/${id}/report`}>
-            <Button variant="secondary">View Report</Button>
+            <Button variant="secondary">Bericht</Button>
           </Link>
           <Link to={`/report/vehicles/${id}`} target="_blank" rel="noopener noreferrer">
-            <Button variant="primary">Public Link</Button>
+            <Button variant="primary">Öffentlicher Link</Button>
           </Link>
         </div>
       </div>

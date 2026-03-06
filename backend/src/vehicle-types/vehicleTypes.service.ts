@@ -1,12 +1,6 @@
 import { prisma } from '../db.js';
 import { ConflictError, NotFoundError } from '../utils/errors.js';
 import type { CreateVehicleTypeInput, UpdateVehicleTypeInput, ImageSide } from './vehicleTypes.schemas.js';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UPLOADS_DIR = path.resolve(__dirname, '../../uploads');
 
 export interface VehicleTypeResponse {
   id: string;
@@ -68,20 +62,8 @@ export async function updateVehicleType(
 }
 
 export async function deleteVehicleType(id: string): Promise<void> {
-  const vehicleType = await findOrThrow(id);
-
-  // Delete associated image files
-  const images = [vehicleType.frontImage, vehicleType.rearImage, vehicleType.leftImage, vehicleType.rightImage];
-  for (const img of images) {
-    if (img) {
-      try {
-        await fs.unlink(path.join(UPLOADS_DIR, path.basename(img)));
-      } catch {
-        // File may already be deleted, ignore
-      }
-    }
-  }
-
+  await findOrThrow(id);
+  // Images are cascade-deleted via the DB foreign key
   await prisma.vehicleType.delete({ where: { id } });
 }
 
@@ -95,26 +77,34 @@ const SIDE_FIELD_MAP: Record<ImageSide, 'frontImage' | 'rearImage' | 'leftImage'
 export async function setImage(
   id: string,
   side: ImageSide,
-  filename: string,
+  imageData: Buffer,
+  mimeType: string,
 ): Promise<VehicleTypeResponse> {
-  const vehicleType = await findOrThrow(id);
+  await findOrThrow(id);
 
   const field = SIDE_FIELD_MAP[side];
-  const oldImage = vehicleType[field];
+  const imageUrl = `/api/vehicle-type-images/${id}/${side}?v=${Date.now()}`;
 
-  // Delete old image file if it exists
-  if (oldImage) {
-    try {
-      await fs.unlink(path.join(UPLOADS_DIR, path.basename(oldImage)));
-    } catch {
-      // Ignore
-    }
-  }
-
-  const imagePath = `/uploads/${filename}`;
+  // Upsert the image record in the DB
+  await prisma.vehicleTypeImage.upsert({
+    where: { vehicleTypeId_side: { vehicleTypeId: id, side } },
+    update: { data: imageData, mimeType },
+    create: { vehicleTypeId: id, side, data: imageData, mimeType },
+  });
 
   return prisma.vehicleType.update({
     where: { id },
-    data: { [field]: imagePath },
+    data: { [field]: imageUrl },
   });
+}
+
+export async function getImage(
+  vehicleTypeId: string,
+  side: string,
+): Promise<{ data: Buffer; mimeType: string } | null> {
+  const image = await prisma.vehicleTypeImage.findUnique({
+    where: { vehicleTypeId_side: { vehicleTypeId, side } },
+  });
+  if (!image) return null;
+  return { data: Buffer.from(image.data), mimeType: image.mimeType };
 }

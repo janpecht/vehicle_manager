@@ -18,22 +18,25 @@ export function DamageTable({
   if (damages.length === 0) return null;
 
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString(locale);
+    new Date(date).toLocaleDateString(locale ?? 'de-DE');
+
+  const defaultTranslateShape = (shape: string) =>
+    shape === 'CIRCLE' ? 'Kreis' : 'Rechteck';
 
   const renderShape = (shape: string) =>
-    translateShape ? translateShape(shape) : shape;
+    translateShape ? translateShape(shape) : defaultTranslateShape(shape);
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b text-xs uppercase text-gray-500">
-            <th className="pb-2 pr-4">{locale === 'de-DE' ? 'Ansicht' : 'View'}</th>
-            <th className="pb-2 pr-4">{locale === 'de-DE' ? 'Form' : 'Shape'}</th>
-            <th className="pb-2 pr-4">{locale === 'de-DE' ? 'Schwere' : 'Severity'}</th>
-            <th className="pb-2 pr-4">{locale === 'de-DE' ? 'Beschreibung' : 'Description'}</th>
+            <th className="pb-2 pr-4">Ansicht</th>
+            <th className="pb-2 pr-4">Form</th>
+            <th className="pb-2 pr-4">Schweregrad</th>
+            <th className="pb-2 pr-4">Beschreibung</th>
             {showStatus && <th className="pb-2 pr-4">Status</th>}
-            <th className="pb-2">{locale === 'de-DE' ? 'Datum' : 'Date'}</th>
+            <th className="pb-2">Datum</th>
           </tr>
         </thead>
         <tbody>
@@ -48,9 +51,9 @@ export function DamageTable({
               {showStatus && (
                 <td className="py-2 pr-4">
                   {damage.isActive ? (
-                    <span className="text-green-600 font-medium">Active</span>
+                    <span className="text-green-600 font-medium">Aktiv</span>
                   ) : (
-                    <span className="text-gray-400">Repaired</span>
+                    <span className="text-gray-400">Repariert</span>
                   )}
                 </td>
               )}

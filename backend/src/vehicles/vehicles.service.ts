@@ -3,7 +3,14 @@ import { ConflictError } from '../utils/errors.js';
 import { findVehicleOrThrow } from '../utils/dbHelpers.js';
 import type { CreateVehicleInput, UpdateVehicleInput, VehicleQuery } from './vehicles.schemas.js';
 
-const vehicleInclude = { vehicleType: true } as const;
+const vehicleInclude = {
+  vehicleType: true,
+  checklistSubmissions: {
+    orderBy: { submittedAt: 'desc' as const },
+    take: 1,
+    select: { mileage: true, submittedAt: true },
+  },
+} as const;
 
 export interface PaginatedVehicles {
   vehicles: unknown[];
@@ -14,17 +21,19 @@ export interface PaginatedVehicles {
 }
 
 export async function listVehicles(query: VehicleQuery): Promise<PaginatedVehicles> {
-  const { search, page, limit } = query;
+  const { search, includeInactive, page, limit } = query;
   const skip = (page - 1) * limit;
 
-  const where = search
-    ? {
-        OR: [
-          { licensePlate: { contains: search, mode: 'insensitive' as const } },
-          { label: { contains: search, mode: 'insensitive' as const } },
-        ],
-      }
-    : {};
+  const where: Record<string, unknown> = {};
+  if (!includeInactive) {
+    where.isActive = true;
+  }
+  if (search) {
+    where.OR = [
+      { licensePlate: { contains: search, mode: 'insensitive' as const } },
+      { label: { contains: search, mode: 'insensitive' as const } },
+    ];
+  }
 
   const [vehicles, total] = await Promise.all([
     prisma.vehicle.findMany({
@@ -99,6 +108,7 @@ export async function updateVehicle(
       ...(input.label !== undefined && { label: input.label }),
       ...(input.formLink !== undefined && { formLink: input.formLink || null }),
       ...(input.vehicleTypeId !== undefined && { vehicleTypeId: input.vehicleTypeId }),
+      ...(input.isActive !== undefined && { isActive: input.isActive }),
     },
     include: vehicleInclude,
   });

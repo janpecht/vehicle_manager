@@ -11,6 +11,9 @@ import { VehicleDetailPage } from './components/vehicles/VehicleDetailPage.tsx';
 import { DamageReportPage } from './components/vehicles/DamageReportPage.tsx';
 import { PublicReportPage } from './components/vehicles/PublicReportPage.tsx';
 import { VehicleTypeListPage } from './components/vehicle-types/VehicleTypeListPage.tsx';
+import { DriverListPage } from './components/drivers/DriverListPage.tsx';
+import { ChecklistListPage } from './components/checklist/ChecklistListPage.tsx';
+import { PublicChecklistPage } from './components/checklist/PublicChecklistPage.tsx';
 import { DamageReport } from './components/damage-canvas/DamageReport.tsx';
 import { useAuthInit } from './hooks/useAuth.ts';
 
@@ -44,11 +47,14 @@ function AppRoutes() {
       >
         <Route path="/" element={<VehicleListPage />} />
         <Route path="/vehicle-types" element={<VehicleTypeListPage />} />
+        <Route path="/drivers" element={<DriverListPage />} />
+        <Route path="/checklists" element={<ChecklistListPage />} />
         <Route path="/vehicles/:id" element={<VehicleDetailPage />} />
         <Route path="/vehicles/:id/report" element={<DamageReportPage />} />
       </Route>
-      {/* Public report — no login required */}
+      {/* Public routes — no login required */}
       <Route path="/report/vehicles/:id" element={<PublicReportPage />} />
+      <Route path="/checklist" element={<PublicChecklistPage />} />
       {/* Embed route — no AppLayout chrome, just the report */}
       <Route
         path="/embed/vehicles/:id"

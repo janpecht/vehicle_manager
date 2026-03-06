@@ -8,7 +8,16 @@ import * as vehicleService from '../../services/vehicle.service.ts';
 import * as damageService from '../../services/damage.service.ts';
 import type { Vehicle } from '../../types/vehicle.ts';
 import type { DamageMarking } from '../../types/damage.ts';
+import type { ViewSide } from '../../types/damage.ts';
+import type { VehicleType } from '../../types/vehicle.ts';
 import { isNotFoundError, getApiErrorMessage } from '../../utils/apiError.ts';
+
+const VIEW_IMAGE_KEY: Record<ViewSide, keyof VehicleType> = {
+  FRONT: 'frontImage',
+  REAR: 'rearImage',
+  LEFT: 'leftImage',
+  RIGHT: 'rightImage',
+};
 
 interface DamageReportProps {
   vehicleId: string;
@@ -32,9 +41,9 @@ export function DamageReport({ vehicleId }: DamageReportProps) {
       setDamages(d);
     } catch (err) {
       if (isNotFoundError(err)) {
-        setError('Vehicle not found');
+        setError('Fahrzeug nicht gefunden');
       } else {
-        setError(getApiErrorMessage(err, 'Failed to load report data'));
+        setError(getApiErrorMessage(err, 'Fehler beim Laden der Berichtsdaten'));
       }
     } finally {
       setLoading(false);
@@ -70,11 +79,11 @@ export function DamageReport({ vehicleId }: DamageReportProps) {
       {/* Report Header */}
       <div className="print:text-center">
         <h2 className="text-xl font-semibold text-gray-900">
-          Damage Report: {vehicle.licensePlate}
+          Schadensbericht: {vehicle.licensePlate}
         </h2>
         {vehicle.label && <p className="text-sm text-gray-500">{vehicle.label}</p>}
         <p className="text-xs text-gray-400 print:text-gray-600">
-          Generated: {new Date().toLocaleDateString()}
+          Erstellt: {new Date().toLocaleDateString('de-DE')}
         </p>
       </div>
 
@@ -85,9 +94,15 @@ export function DamageReport({ vehicleId }: DamageReportProps) {
           return (
             <div key={view} className="rounded-lg bg-white p-3 shadow print:shadow-none print:border print:border-gray-300 print:break-inside-avoid">
               <h3 className="mb-2 text-sm font-medium text-gray-700">{VIEW_LABELS[view]}</h3>
-              <SprinterCanvas viewSide={view} damages={viewDamages} />
+              <SprinterCanvas
+                viewSide={view}
+                damages={viewDamages}
+                backgroundImageUrl={
+                  (vehicle.vehicleType?.[VIEW_IMAGE_KEY[view]] as string | null) ?? undefined
+                }
+              />
               <p className="mt-1 text-xs text-gray-500">
-                {viewDamages.filter((d) => d.isActive).length} active damage{viewDamages.filter((d) => d.isActive).length !== 1 ? 's' : ''}
+                {viewDamages.filter((d) => d.isActive).length} aktive {viewDamages.filter((d) => d.isActive).length === 1 ? 'Schaden' : 'Schäden'}
               </p>
             </div>
           );
@@ -96,9 +111,9 @@ export function DamageReport({ vehicleId }: DamageReportProps) {
 
       {/* Damage Table */}
       <div className="rounded-lg bg-white p-4 shadow print:shadow-none print:border print:border-gray-300 print:break-inside-avoid">
-        <h3 className="mb-3 text-lg font-medium text-gray-900">Damage List</h3>
+        <h3 className="mb-3 text-lg font-medium text-gray-900">Schadensliste</h3>
         {sortedDamages.length === 0 ? (
-          <p className="text-sm text-gray-500">No damages recorded for this vehicle.</p>
+          <p className="text-sm text-gray-500">Keine Schäden für dieses Fahrzeug erfasst.</p>
         ) : (
           <DamageTable damages={sortedDamages} showStatus />
         )}
