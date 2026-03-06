@@ -53,7 +53,7 @@ Edit `docker-compose.yml` to set your environment variables (see section below),
 cat > .env <<EOF
 POSTGRES_USER=sprinter
 POSTGRES_PASSWORD=your_secure_db_password
-POSTGRES_DB=sprinter_damage_db
+POSTGRES_DB=vehicle_db
 JWT_ACCESS_SECRET=your-access-secret-min-32-characters-long!!
 JWT_REFRESH_SECRET=your-refresh-secret-min-32-characters-long!!
 CORS_ORIGIN=http://your-domain:5173
@@ -93,7 +93,7 @@ All backend environment variables are passed via `docker-compose.yml` or a root 
 
 | Variable | Required | Description | Default / Example |
 |----------|----------|-------------|-------------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string. In Docker Compose this is built from the postgres service settings. | `postgresql://sprinter:password@postgres:5432/sprinter_damage_db?schema=public` |
+| `DATABASE_URL` | Yes | PostgreSQL connection string. In Docker Compose this is built from the postgres service settings. | `postgresql://sprinter:password@postgres:5432/vehicle_db?schema=public` |
 | `JWT_ACCESS_SECRET` | Yes | Secret for signing access tokens. **Must be at least 32 characters.** | — |
 | `JWT_REFRESH_SECRET` | Yes | Secret for signing refresh tokens. **Must be at least 32 characters.** Must differ from access secret. | — |
 | `ACCESS_TOKEN_EXPIRES_IN` | No | Access token TTL (ms-compatible string) | `15m` |
@@ -117,7 +117,7 @@ All backend environment variables are passed via `docker-compose.yml` or a root 
 |----------|-------------|---------|
 | `POSTGRES_USER` | Database user | `sprinter` |
 | `POSTGRES_PASSWORD` | Database password | `sprinter_dev_password` |
-| `POSTGRES_DB` | Database name | `sprinter_damage_db` |
+| `POSTGRES_DB` | Database name | `vehicle_db` |
 
 > **Important for production:** Change `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, and `POSTGRES_PASSWORD` to strong, unique values. Never use the default development secrets in production.
 

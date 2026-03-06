@@ -8,11 +8,11 @@ services:
     environment:
       POSTGRES_USER: sprinter
       POSTGRES_PASSWORD: sprinter_dev_password
-      POSTGRES_DB: sprinter_damage_db
+      POSTGRES_DB: vehicle_db
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sprinter -d sprinter_damage_db"]
+      test: ["CMD-SHELL", "pg_isready -U sprinter -d vehicle_db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,7 +27,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgresql://sprinter:sprinter_dev_password@postgres:5432/sprinter_damage_db?schema=public"
+      DATABASE_URL: "postgresql://sprinter:sprinter_dev_password@postgres:5432/vehicle_db?schema=public"
       JWT_ACCESS_SECRET: "dev-access-secret-change-in-production-min32chars"
       JWT_REFRESH_SECRET: "dev-refresh-secret-change-in-production-min32chars"
       ACCESS_TOKEN_EXPIRES_IN: "15m"
