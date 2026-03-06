@@ -28,9 +28,9 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50">
           <div className="text-center">
-            <h1 className="mb-2 text-2xl font-bold text-gray-900">Something went wrong</h1>
-            <p className="mb-6 text-gray-600">An unexpected error occurred. Please try reloading the page.</p>
-            <Button onClick={() => window.location.reload()}>Reload Page</Button>
+            <h1 className="mb-2 text-2xl font-bold text-gray-900">Etwas ist schiefgelaufen</h1>
+            <p className="mb-6 text-gray-600">Ein unerwarteter Fehler ist aufgetreten. Bitte lade die Seite neu.</p>
+            <Button onClick={() => window.location.reload()}>Seite neu laden</Button>
           </div>
         </div>
       );

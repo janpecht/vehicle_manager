@@ -1,17 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../src/app.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-const app = createApp();
+import { prisma, app, createTestUser, authHeader as makeAuthHeader } from './helpers.ts';
 
 let accessToken: string;
 let userId: string;
 let vehicleId: string;
 
 const testUser = {
-  email: 'damagetest@test.de',
+  email: 'damagetest@dieeisfabrik.de',
   password: 'Test1234',
   name: 'Damage Test User',
 };
@@ -36,9 +32,9 @@ beforeAll(async () => {
   await prisma.user.deleteMany({ where: { email: testUser.email } });
 
   // Create test user
-  const res = await request(app).post('/auth/register').send(testUser);
-  accessToken = res.body.accessToken;
-  userId = res.body.user.id;
+  const result = await createTestUser(testUser.email, testUser.password, testUser.name);
+  accessToken = result.accessToken;
+  userId = result.userId;
 });
 
 afterAll(async () => {
@@ -63,7 +59,7 @@ beforeEach(async () => {
 });
 
 function authHeader() {
-  return { Authorization: `Bearer ${accessToken}` };
+  return makeAuthHeader(accessToken);
 }
 
 function damageUrl(vId = vehicleId) {

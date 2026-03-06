@@ -1,15 +1,10 @@
-import { PrismaClient } from '@prisma/client';
-import { NotFoundError, ValidationError } from '../utils/errors.js';
+import { prisma } from '../db.js';
+import { ValidationError } from '../utils/errors.js';
+import { findVehicleOrThrow, findDamageOrThrow } from '../utils/dbHelpers.js';
 import type { CreateDamageInput, UpdateDamagePositionInput, DamageQuery } from './damages.schemas.js';
 
-const prisma = new PrismaClient();
-
 export async function listDamages(vehicleId: string, query: DamageQuery) {
-  // Verify vehicle exists
-  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
-  if (!vehicle) {
-    throw new NotFoundError('Vehicle not found');
-  }
+  await findVehicleOrThrow(vehicleId);
 
   const where: Record<string, unknown> = { vehicleId };
   if (query.viewSide) {
@@ -26,11 +21,7 @@ export async function listDamages(vehicleId: string, query: DamageQuery) {
 }
 
 export async function createDamage(vehicleId: string, userId: string, input: CreateDamageInput) {
-  // Verify vehicle exists
-  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
-  if (!vehicle) {
-    throw new NotFoundError('Vehicle not found');
-  }
+  await findVehicleOrThrow(vehicleId);
 
   return prisma.damageMarking.create({
     data: {
@@ -49,18 +40,11 @@ export async function createDamage(vehicleId: string, userId: string, input: Cre
 }
 
 export async function getDamage(damageId: string) {
-  const damage = await prisma.damageMarking.findUnique({ where: { id: damageId } });
-  if (!damage) {
-    throw new NotFoundError('Damage marking not found');
-  }
-  return damage;
+  return findDamageOrThrow(damageId);
 }
 
 export async function updateDamagePosition(damageId: string, input: UpdateDamagePositionInput) {
-  const damage = await prisma.damageMarking.findUnique({ where: { id: damageId } });
-  if (!damage) {
-    throw new NotFoundError('Damage marking not found');
-  }
+  await findDamageOrThrow(damageId);
   return prisma.damageMarking.update({
     where: { id: damageId },
     data: { x: input.x, y: input.y },
@@ -68,18 +52,12 @@ export async function updateDamagePosition(damageId: string, input: UpdateDamage
 }
 
 export async function deleteDamage(damageId: string) {
-  const damage = await prisma.damageMarking.findUnique({ where: { id: damageId } });
-  if (!damage) {
-    throw new NotFoundError('Damage marking not found');
-  }
+  await findDamageOrThrow(damageId);
   await prisma.damageMarking.delete({ where: { id: damageId } });
 }
 
 export async function repairDamage(damageId: string, userId: string) {
-  const damage = await prisma.damageMarking.findUnique({ where: { id: damageId } });
-  if (!damage) {
-    throw new NotFoundError('Damage marking not found');
-  }
+  const damage = await findDamageOrThrow(damageId);
   if (!damage.isActive) {
     throw new ValidationError('Damage is already repaired');
   }

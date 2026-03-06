@@ -25,6 +25,7 @@ vi.mock('react-konva', () => ({
   Path: (props: Record<string, unknown>) => <div data-testid="konva-path" data-fill={props.fill} />,
   Rect: (props: Record<string, unknown>) => <div data-testid="konva-rect" data-fill={props.fill} />,
   Circle: (props: Record<string, unknown>) => <div data-testid="konva-circle" data-fill={props.fill} />,
+  Image: (props: Record<string, unknown>) => <div data-testid="konva-image" data-width={props.width} />,
 }));
 
 import * as vehicleService from '../src/services/vehicle.service.ts';
@@ -34,6 +35,9 @@ const mockVehicle = {
   id: 'v1',
   licensePlate: 'HD-AB 1234',
   label: 'Sprinter 1',
+  formLink: null,
+  vehicleTypeId: null,
+  vehicleType: null,
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
 };

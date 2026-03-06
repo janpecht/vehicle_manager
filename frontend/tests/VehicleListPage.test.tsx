@@ -21,8 +21,8 @@ import * as vehicleService from '../src/services/vehicle.service.ts';
 
 const mockVehicles = {
   vehicles: [
-    { id: '1', licensePlate: 'HD-AB 1234', label: 'Sprinter 1', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
-    { id: '2', licensePlate: 'KA-CD 5678', label: null, createdAt: '2026-01-02T00:00:00Z', updatedAt: '2026-01-02T00:00:00Z' },
+    { id: '1', licensePlate: 'HD-AB 1234', label: 'Sprinter 1', formLink: null, vehicleTypeId: null, vehicleType: null, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+    { id: '2', licensePlate: 'KA-CD 5678', label: null, formLink: null, vehicleTypeId: null, vehicleType: null, createdAt: '2026-01-02T00:00:00Z', updatedAt: '2026-01-02T00:00:00Z' },
   ],
   total: 2,
   page: 1,

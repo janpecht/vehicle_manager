@@ -8,6 +8,7 @@ import type {
 
 export async function listVehicles(params?: {
   search?: string;
+  includeInactive?: boolean;
   page?: number;
   limit?: number;
 }): Promise<PaginatedVehicles> {

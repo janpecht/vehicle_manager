@@ -6,8 +6,7 @@ import { Button } from '../ui/Button.tsx';
 import { Alert } from '../ui/Alert.tsx';
 import { useAuthStore } from '../../stores/authStore.ts';
 import * as authService from '../../services/auth.service.ts';
-import type { ApiError } from '../../types/auth.ts';
-import axios from 'axios';
+import { getApiErrorMessage } from '../../utils/apiError.ts';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -28,23 +27,18 @@ export function LoginPage() {
       setAuth(data.user, data.accessToken);
       navigate('/', { replace: true });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        const apiError = err.response.data as ApiError;
-        setError(apiError.error.message);
-      } else {
-        setError('An unexpected error occurred');
-      }
+      setError(getApiErrorMessage(err, 'Ein unerwarteter Fehler ist aufgetreten'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthLayout title="Sprinter Damage Manager" subtitle="Sign in to your account">
+    <AuthLayout title="Fahrzeugmanager" subtitle="Melde dich an">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <Alert type="error" message={error} />}
         <Input
-          label="Email"
+          label="E-Mail"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -52,7 +46,7 @@ export function LoginPage() {
           autoComplete="email"
         />
         <Input
-          label="Password"
+          label="Passwort"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -60,12 +54,12 @@ export function LoginPage() {
           autoComplete="current-password"
         />
         <Button type="submit" loading={loading} className="w-full">
-          Sign In
+          Anmelden
         </Button>
         <p className="text-center text-sm text-gray-600">
-          No account?{' '}
+          Noch kein Konto?{' '}
           <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-            Register
+            Registrieren
           </Link>
         </p>
       </form>

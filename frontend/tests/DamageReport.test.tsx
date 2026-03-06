@@ -13,57 +13,11 @@ vi.mock('../src/services/damage.service.ts', () => ({
 }));
 
 // Mock Konva components
-vi.mock('react-konva', () => ({
-  Stage: ({ children, ...props }: Record<string, unknown>) => (
-    <div data-testid="konva-stage" data-width={props.width} data-height={props.height}>
-      {children as React.ReactNode}
-    </div>
-  ),
-  Layer: ({ children }: { children: React.ReactNode }) => <div data-testid="konva-layer">{children}</div>,
-  Path: (props: Record<string, unknown>) => <div data-testid="konva-path" data-fill={props.fill} />,
-  Rect: (props: Record<string, unknown>) => <div data-testid="konva-rect" data-fill={props.fill} />,
-  Circle: (props: Record<string, unknown>) => <div data-testid="konva-circle" data-fill={props.fill} />,
-}));
+vi.mock('react-konva', () => import('./mocks/konva.tsx'));
 
 import * as vehicleService from '../src/services/vehicle.service.ts';
 import * as damageService from '../src/services/damage.service.ts';
-
-const mockVehicle = {
-  id: 'v1',
-  licensePlate: 'HD-AB 1234',
-  label: 'Sprinter 1',
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedAt: '2026-01-01T00:00:00Z',
-};
-
-const mockActiveDamage = {
-  id: 'd1',
-  vehicleId: 'v1',
-  viewSide: 'LEFT' as const,
-  shape: 'CIRCLE' as const,
-  x: 0.5,
-  y: 0.3,
-  width: 0.05,
-  height: 0.05,
-  description: 'Scratch on door',
-  severity: 'MEDIUM' as const,
-  createdAt: '2026-01-15T00:00:00Z',
-  createdBy: '1',
-  repairedAt: null,
-  repairedBy: null,
-  isActive: true,
-};
-
-const mockRepairedDamage = {
-  ...mockActiveDamage,
-  id: 'd2',
-  viewSide: 'FRONT' as const,
-  description: 'Bumper dent',
-  severity: 'HIGH' as const,
-  isActive: false,
-  repairedAt: '2026-02-01T00:00:00Z',
-  repairedBy: 'u2',
-};
+import { mockVehicle, mockDamage as mockActiveDamage, mockRepairedDamage } from './fixtures.ts';
 
 describe('DamageReport', () => {
   beforeEach(() => {

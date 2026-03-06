@@ -3,14 +3,20 @@ import { useParams } from 'react-router-dom';
 import { LoadingSpinner } from '../ui/LoadingSpinner.tsx';
 import { Alert } from '../ui/Alert.tsx';
 import { SprinterCanvas } from '../damage-canvas/SprinterCanvas.tsx';
-import { ALL_VIEWS, VIEW_LABELS } from '../damage-canvas/sprinterSvgPaths.ts';
-import { SEVERITY_COLORS, SEVERITY_LABELS } from '../../types/damage.ts';
+import { DamageTable } from '../damage-canvas/DamageTable.tsx';
+import { ALL_VIEWS, VIEW_LABELS, VIEW_ORDER } from '../damage-canvas/sprinterSvgPaths.ts';
 import * as publicService from '../../services/public.service.ts';
+import { isNotFoundError } from '../../utils/apiError.ts';
 import type { Vehicle } from '../../types/vehicle.ts';
-import type { DamageMarking } from '../../types/damage.ts';
-import axios from 'axios';
+import type { DamageMarking, ViewSide } from '../../types/damage.ts';
+import type { VehicleType } from '../../types/vehicle.ts';
 
-const VIEW_ORDER = { FRONT: 0, REAR: 1, LEFT: 2, RIGHT: 3 } as const;
+const VIEW_IMAGE_KEY: Record<ViewSide, keyof VehicleType> = {
+  FRONT: 'frontImage',
+  REAR: 'rearImage',
+  LEFT: 'leftImage',
+  RIGHT: 'rightImage',
+};
 
 export function PublicReportPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +34,7 @@ export function PublicReportPage() {
       setVehicle(data.vehicle);
       setDamages(data.damages);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
+      if (isNotFoundError(err)) {
         setError('Fahrzeug nicht gefunden');
       } else {
         setError('Fehler beim Laden der Daten');
@@ -96,7 +102,13 @@ export function PublicReportPage() {
                 <h2 className="mb-2 text-sm font-semibold text-gray-700 sm:text-base">
                   {VIEW_LABELS[view]}
                 </h2>
-                <SprinterCanvas viewSide={view} damages={viewDamages} />
+                <SprinterCanvas
+                  viewSide={view}
+                  damages={viewDamages}
+                  backgroundImageUrl={
+                    (vehicle.vehicleType?.[VIEW_IMAGE_KEY[view]] as string | null) ?? undefined
+                  }
+                />
                 <p className="mt-1 text-xs text-gray-500">
                   {viewDamages.length} {viewDamages.length === 1 ? 'Schaden' : 'Schäden'}
                 </p>
@@ -106,50 +118,16 @@ export function PublicReportPage() {
         </div>
 
         {/* Damage Table */}
-        {sortedDamages.length > 0 && (
+        {sortedDamages.length > 0 ? (
           <div className="mt-6 rounded-lg bg-white p-4 shadow-sm print:shadow-none print:border print:border-gray-300 print:break-inside-avoid">
             <h2 className="mb-3 text-base font-semibold text-gray-900 sm:text-lg">Schadensliste</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b text-xs uppercase text-gray-500">
-                    <th className="pb-2 pr-4">Ansicht</th>
-                    <th className="pb-2 pr-4">Form</th>
-                    <th className="pb-2 pr-4">Schwere</th>
-                    <th className="pb-2 pr-4">Beschreibung</th>
-                    <th className="pb-2">Datum</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedDamages.map((damage) => (
-                    <tr key={damage.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4">{VIEW_LABELS[damage.viewSide]}</td>
-                      <td className="py-2 pr-4">
-                        {damage.shape === 'CIRCLE' ? 'Kreis' : 'Rechteck'}
-                      </td>
-                      <td className="py-2 pr-4">
-                        <span
-                          className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold text-white"
-                          style={{ backgroundColor: SEVERITY_COLORS[damage.severity] }}
-                        >
-                          {SEVERITY_LABELS[damage.severity]}
-                        </span>
-                      </td>
-                      <td className="py-2 pr-4 max-w-48 truncate">
-                        {damage.description ?? '—'}
-                      </td>
-                      <td className="py-2 text-gray-500">
-                        {new Date(damage.createdAt).toLocaleDateString('de-DE')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DamageTable
+              damages={sortedDamages}
+              locale="de-DE"
+              translateShape={(s) => (s === 'CIRCLE' ? 'Kreis' : 'Rechteck')}
+            />
           </div>
-        )}
-
-        {sortedDamages.length === 0 && (
+        ) : (
           <div className="mt-6 rounded-lg bg-white p-6 text-center shadow-sm">
             <p className="text-gray-500">Keine aktiven Schäden für dieses Fahrzeug vorhanden.</p>
           </div>

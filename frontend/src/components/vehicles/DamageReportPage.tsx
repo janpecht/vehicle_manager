@@ -12,11 +12,11 @@ export function DamageReportPage() {
     <div>
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Button variant="secondary" onClick={() => navigate(`/vehicles/${id}`)}>
-          &larr; Back to Vehicle
+          &larr; Zurück zum Fahrzeug
         </Button>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={() => window.print()}>
-            Print
+            Drucken
           </Button>
         </div>
       </div>

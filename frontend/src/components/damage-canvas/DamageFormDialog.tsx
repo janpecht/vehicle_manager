@@ -34,14 +34,14 @@ export function DamageFormDialog({ open, onClose, onSave, shape, loading }: Dama
     onClose();
   }
 
-  const title = `Add ${shape === 'CIRCLE' ? 'Circle' : 'Rectangle'} Damage`;
+  const title = `${shape === 'CIRCLE' ? 'Kreis' : 'Rechteck'}-Schaden hinzufügen`;
 
   return (
     <Modal open={open} onClose={handleClose} title={title}>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="damage-description" className="block text-sm font-medium text-gray-700 mb-1">
-            Description (optional)
+            Beschreibung (optional)
           </label>
           <input
             id="damage-description"
@@ -50,12 +50,12 @@ export function DamageFormDialog({ open, onClose, onSave, shape, loading }: Dama
             onChange={(e) => setDescription(e.target.value)}
             maxLength={500}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Describe the damage..."
+            placeholder="Schaden beschreiben..."
           />
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Severity</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Schweregrad</label>
           <div className="flex gap-2">
             {SEVERITIES.map((s) => (
               <button
@@ -78,10 +78,10 @@ export function DamageFormDialog({ open, onClose, onSave, shape, loading }: Dama
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="secondary" onClick={handleClose} disabled={loading}>
-            Cancel
+            Abbrechen
           </Button>
           <Button type="submit" loading={loading}>
-            Save
+            Speichern
           </Button>
         </div>
       </form>

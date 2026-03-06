@@ -1,7 +1,7 @@
 export type ViewSide = 'FRONT' | 'REAR' | 'LEFT' | 'RIGHT';
 export type Shape = 'CIRCLE' | 'RECTANGLE';
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH';
-export type CanvasTool = 'POINTER' | 'CIRCLE' | 'RECTANGLE';
+export type CanvasTool = 'CIRCLE' | 'RECTANGLE';
 
 export interface DamageMarking {
   id: string;
@@ -39,9 +39,9 @@ export const SEVERITY_COLORS: Record<Severity, string> = {
 };
 
 export const SEVERITY_LABELS: Record<Severity, string> = {
-  LOW: 'Low',
-  MEDIUM: 'Medium',
-  HIGH: 'High',
+  LOW: 'Niedrig',
+  MEDIUM: 'Mittel',
+  HIGH: 'Hoch',
 };
 
 export const DEFAULT_DAMAGE_SIZE = 0.05;

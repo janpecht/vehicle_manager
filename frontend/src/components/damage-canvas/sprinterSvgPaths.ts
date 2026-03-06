@@ -428,10 +428,12 @@ export function getSprinterView(side: ViewSide): SprinterView {
 }
 
 export const VIEW_LABELS: Record<ViewSide, string> = {
-  FRONT: 'Front',
-  REAR: 'Rear',
-  LEFT: 'Left Side',
-  RIGHT: 'Right Side',
+  FRONT: 'Vorne',
+  REAR: 'Hinten',
+  LEFT: 'Linke Seite',
+  RIGHT: 'Rechte Seite',
 };
 
 export const ALL_VIEWS: ViewSide[] = ['FRONT', 'REAR', 'LEFT', 'RIGHT'];
+
+export const VIEW_ORDER: Record<ViewSide, number> = { FRONT: 0, REAR: 1, LEFT: 2, RIGHT: 3 };

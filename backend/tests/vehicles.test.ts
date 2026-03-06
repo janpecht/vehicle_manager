@@ -1,15 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../src/app.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-const app = createApp();
+import { prisma, app, createTestUser, authHeader as makeAuthHeader } from './helpers.ts';
 
 let accessToken: string;
 
 const testUser = {
-  email: 'vehicletest@test.de',
+  email: 'vehicletest@dieeisfabrik.de',
   password: 'Test1234',
   name: 'Vehicle Test User',
 };
@@ -21,8 +17,8 @@ beforeAll(async () => {
   await prisma.refreshToken.deleteMany();
   await prisma.user.deleteMany({ where: { email: testUser.email } });
 
-  const res = await request(app).post('/auth/register').send(testUser);
-  accessToken = res.body.accessToken;
+  const result = await createTestUser(testUser.email, testUser.password, testUser.name);
+  accessToken = result.accessToken;
 });
 
 afterAll(async () => {
@@ -39,7 +35,7 @@ beforeEach(async () => {
 });
 
 function authHeader() {
-  return { Authorization: `Bearer ${accessToken}` };
+  return makeAuthHeader(accessToken);
 }
 
 describe('POST /api/vehicles', () => {
@@ -140,6 +136,35 @@ describe('POST /api/vehicles', () => {
       .send({ licensePlate: 'HD-AB 1234' });
 
     expect(res.status).toBe(401);
+  });
+
+  it('should create a vehicle with a form link', async () => {
+    const res = await request(app)
+      .post('/api/vehicles')
+      .set(authHeader())
+      .send({ licensePlate: 'HD-AB 1234', formLink: 'https://example.com/form' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.vehicle.formLink).toBe('https://example.com/form');
+  });
+
+  it('should create a vehicle with null formLink when not provided', async () => {
+    const res = await request(app)
+      .post('/api/vehicles')
+      .set(authHeader())
+      .send({ licensePlate: 'HD-AB 1234' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.vehicle.formLink).toBeNull();
+  });
+
+  it('should reject invalid form link URL', async () => {
+    const res = await request(app)
+      .post('/api/vehicles')
+      .set(authHeader())
+      .send({ licensePlate: 'HD-AB 1234', formLink: 'not-a-url' });
+
+    expect(res.status).toBe(400);
   });
 });
 
@@ -299,6 +324,34 @@ describe('PUT /api/vehicles/:id', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.vehicle.label).toBeNull();
+  });
+
+  it('should update vehicle form link', async () => {
+    const created = await prisma.vehicle.create({
+      data: { licensePlate: 'HD-AB 1234' },
+    });
+
+    const res = await request(app)
+      .put(`/api/vehicles/${created.id}`)
+      .set(authHeader())
+      .send({ formLink: 'https://example.com/form' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.vehicle.formLink).toBe('https://example.com/form');
+  });
+
+  it('should clear form link by sending empty string', async () => {
+    const created = await prisma.vehicle.create({
+      data: { licensePlate: 'HD-AB 1234', formLink: 'https://example.com/form' },
+    });
+
+    const res = await request(app)
+      .put(`/api/vehicles/${created.id}`)
+      .set(authHeader())
+      .send({ formLink: '' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.vehicle.formLink).toBeNull();
   });
 
   it('should reject duplicate license plate on update', async () => {

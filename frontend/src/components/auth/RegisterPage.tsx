@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout.tsx';
 import { Input } from '../ui/Input.tsx';
@@ -19,6 +19,13 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [allowedDomain, setAllowedDomain] = useState<string | null>(null);
+
+  useEffect(() => {
+    axios.get<{ allowedEmailDomain: string }>('/public/config')
+      .then((res) => setAllowedDomain(res.data.allowedEmailDomain))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -43,7 +50,7 @@ export function RegisterPage() {
           setError(apiError.error.message);
         }
       } else {
-        setError('An unexpected error occurred');
+        setError('Ein unerwarteter Fehler ist aufgetreten');
       }
     } finally {
       setLoading(false);
@@ -51,7 +58,7 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout title="Create Account" subtitle="Register for the Sprinter Damage Manager">
+    <AuthLayout title="Konto erstellen" subtitle="Registriere dich für den Fahrzeugmanager">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <Alert type="error" message={error} />}
         <Input
@@ -64,7 +71,7 @@ export function RegisterPage() {
           autoComplete="name"
         />
         <Input
-          label="Email"
+          label="E-Mail"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -72,8 +79,13 @@ export function RegisterPage() {
           required
           autoComplete="email"
         />
+        {allowedDomain && (
+          <p className="text-xs text-gray-500">
+            Nur @{allowedDomain} E-Mail-Adressen erlaubt
+          </p>
+        )}
         <Input
-          label="Password"
+          label="Passwort"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -83,15 +95,15 @@ export function RegisterPage() {
           minLength={8}
         />
         <p className="text-xs text-gray-500">
-          Minimum 8 characters, with uppercase, lowercase, and a digit.
+          Mindestens 8 Zeichen, mit Groß- und Kleinbuchstaben und einer Ziffer.
         </p>
         <Button type="submit" loading={loading} className="w-full">
-          Register
+          Registrieren
         </Button>
         <p className="text-center text-sm text-gray-600">
-          Already have an account?{' '}
+          Bereits ein Konto?{' '}
           <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            Sign In
+            Anmelden
           </Link>
         </p>
       </form>

@@ -9,9 +9,8 @@ interface DamageToolbarProps {
 }
 
 const TOOLS: Array<{ value: CanvasTool; label: string }> = [
-  { value: 'POINTER', label: 'Pointer' },
-  { value: 'CIRCLE', label: 'Circle' },
-  { value: 'RECTANGLE', label: 'Rectangle' },
+  { value: 'CIRCLE', label: 'Kreis' },
+  { value: 'RECTANGLE', label: 'Rechteck' },
 ];
 
 export function DamageToolbar({
@@ -40,7 +39,7 @@ export function DamageToolbar({
         ))}
       </div>
       <span className="rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-        {damageCount} {damageCount === 1 ? 'damage' : 'damages'}
+        {damageCount} {damageCount === 1 ? 'Schaden' : 'Schäden'}
       </span>
       <label className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-600">
         <input
@@ -49,7 +48,7 @@ export function DamageToolbar({
           onChange={(e) => onShowRepairedChange(e.target.checked)}
           className="rounded border-gray-300"
         />
-        Show Repaired
+        Reparierte anzeigen
       </label>
     </div>
   );
