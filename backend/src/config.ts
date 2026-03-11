@@ -12,13 +12,14 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
 
   // SMTP config for checklist email notifications (all optional)
-  SMTP_HOST: z.string().optional(),
+  // Empty strings are treated as undefined so Docker Compose can use ${VAR:-} defaults
+  SMTP_HOST: z.string().optional().transform((v) => v || undefined),
   SMTP_PORT: z.coerce.number().int().positive().optional(),
   SMTP_SECURE: z.coerce.boolean().default(false),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().optional(),
-  CHECKLIST_NOTIFY_EMAIL: z.string().email().optional(),
+  SMTP_USER: z.string().optional().transform((v) => v || undefined),
+  SMTP_PASS: z.string().optional().transform((v) => v || undefined),
+  SMTP_FROM: z.string().optional().transform((v) => v || undefined),
+  CHECKLIST_NOTIFY_EMAIL: z.string().email().optional().or(z.literal('')).transform((v) => v || undefined),
 
   // Restrict registration to this email domain (e.g. "example.com")
   ALLOWED_EMAIL_DOMAIN: z.string().min(1, 'ALLOWED_EMAIL_DOMAIN is required (e.g. "example.com")'),

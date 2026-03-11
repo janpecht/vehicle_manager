@@ -5,17 +5,21 @@ RUN apk add --no-cache python3 make g++ openssl
 
 WORKDIR /app
 
-COPY package.json ./
-COPY prisma ./prisma/
+COPY backend/package.json ./
+COPY package-lock.json ./
+COPY backend/prisma ./prisma/
 
 RUN npm install
 
 RUN npx prisma generate
 
-COPY tsconfig.json ./
-COPY src ./src/
+COPY backend/tsconfig.json ./
+COPY backend/src ./src/
 
 RUN npm run build
+
+# Remove devDependencies after build
+RUN npm prune --omit=dev
 
 # Production stage
 FROM node:18-alpine

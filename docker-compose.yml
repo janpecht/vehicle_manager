@@ -3,55 +3,60 @@ services:
     image: postgres:16-alpine
     container_name: sprinter-postgres
     restart: unless-stopped
-    ports:
-      - "5432:5432"
+    # No external ports — only accessible within Docker network
+    expose:
+      - "5432"
     environment:
-      POSTGRES_USER: sprinter
-      POSTGRES_PASSWORD: sprinter_dev_password
-      POSTGRES_DB: vehicle_db
+      POSTGRES_USER: ${POSTGRES_USER:-sprinter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-vehicle_db}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sprinter -d vehicle_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sprinter} -d ${POSTGRES_DB:-vehicle_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: sprinter-backend
     restart: unless-stopped
-    ports:
-      - "3001:3001"
+    # No external ports — nginx proxies to backend internally
+    expose:
+      - "3001"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgresql://sprinter:sprinter_dev_password@postgres:5432/vehicle_db?schema=public"
-      JWT_ACCESS_SECRET: "dev-access-secret-change-in-production-min32chars"
-      JWT_REFRESH_SECRET: "dev-refresh-secret-change-in-production-min32chars"
-      ACCESS_TOKEN_EXPIRES_IN: "15m"
-      REFRESH_TOKEN_EXPIRES_IN_DAYS: "7"
-      BCRYPT_ROUNDS: "12"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-sprinter}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-vehicle_db}?schema=public"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required (min 32 chars)}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required (min 32 chars)}
+      ACCESS_TOKEN_EXPIRES_IN: ${ACCESS_TOKEN_EXPIRES_IN:-15m}
+      REFRESH_TOKEN_EXPIRES_IN_DAYS: ${REFRESH_TOKEN_EXPIRES_IN_DAYS:-7}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
       PORT: "3001"
-      NODE_ENV: "development"
-      CORS_ORIGIN: "http://localhost:5173"
-      ALLOWED_EMAIL_DOMAIN: "dieeisfabrik.de"
-      # SMTP config (optional - uncomment and configure for email notifications)
-      # SMTP_HOST: "smtp.example.com"
-      # SMTP_PORT: "587"
-      # SMTP_SECURE: "false"
-      # SMTP_USER: "user@example.com"
-      # SMTP_PASS: "password"
-      # SMTP_FROM: "noreply@example.com"
-      # CHECKLIST_NOTIFY_EMAIL: "fleet@example.com"
+      NODE_ENV: "production"
+      CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN is required (e.g. https://your-domain.com)}
+      ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:?ALLOWED_EMAIL_DOMAIN is required}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      CHECKLIST_NOTIFY_EMAIL: ${CHECKLIST_NOTIFY_EMAIL:-}
 
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: sprinter-frontend
     restart: unless-stopped
     ports:
-      - "5173:80"
+      - "${FRONTEND_PORT:-80}:80"
     depends_on:
       - backend
 

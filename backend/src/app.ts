@@ -19,8 +19,8 @@ import { createRateLimiter } from './utils/rateLimiter.js';
 export function createApp() {
   const app = express();
 
-  // Trust proxy (for running behind nginx/reverse proxy)
-  app.set('trust proxy', 1);
+  // Trust proxy chain (Traefik -> nginx -> Express)
+  app.set('trust proxy', 2);
 
   // Security headers
   app.use(helmet());

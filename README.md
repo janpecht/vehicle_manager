@@ -28,14 +28,63 @@ A web application for documenting and tracking damage on a fleet of delivery van
 
 ---
 
-## Deployment with Docker Compose
+## Deployment with Dokploy (recommended)
 
-This is the recommended way to deploy the full stack (PostgreSQL + Backend + Frontend).
+[Dokploy](https://dokploy.com) is a self-hosted PaaS that manages Docker Compose deployments with automatic SSL, environment variables, and GitHub integration.
+
+### Prerequisites
+
+- A server with Dokploy installed
+- This repository connected to Dokploy (via GitHub)
+
+### Setup in Dokploy
+
+1. **Create a new Compose project** in Dokploy and connect this GitHub repo
+2. **Set the Compose path** to `docker-compose.yml`
+3. **Add environment variables** in the Dokploy UI (Settings > Environment):
+
+   ```env
+   # Required
+   POSTGRES_PASSWORD=<generate a strong password>
+   JWT_ACCESS_SECRET=<random string, min 32 chars>
+   JWT_REFRESH_SECRET=<random string, min 32 chars>
+   CORS_ORIGIN=https://your-domain.com
+   ALLOWED_EMAIL_DOMAIN=your-company.com
+
+   # Optional — SMTP for checklist alarm emails
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER=user@example.com
+   SMTP_PASS=password
+   SMTP_FROM=noreply@example.com
+   CHECKLIST_NOTIFY_EMAIL=fleet@example.com
+   ```
+
+4. **Configure the domain** in Dokploy for the `frontend` service (port 80). Dokploy will handle SSL/TLS via Let's Encrypt automatically
+5. **Deploy** — Dokploy will build all containers and start them. The backend runs Prisma migrations automatically on startup
+
+### First Login
+
+Register at `https://your-domain.com/register` (email must match `ALLOWED_EMAIL_DOMAIN`).
+
+### Architecture Notes
+
+- **Only the frontend (nginx) is exposed** — it proxies `/api`, `/auth`, `/public`, `/api-docs` to the backend internally
+- PostgreSQL and backend have no external ports (Docker-internal only)
+- The backend runs `prisma migrate deploy` on every container start, so schema changes are applied automatically on redeployment
+- Alarm emails are sent only when a checklist submission has problem conditions (new damage, dashboard warnings, dirty seats/cargo, smoking, etc.)
+
+---
+
+## Deployment with Docker Compose (manual)
+
+For manual deployment without Dokploy.
 
 ### Prerequisites
 
 - Docker & Docker Compose v2+
-- A server or VM with ports 5173 (frontend) and 3001 (backend) available
+- A server or VM with port 80 available
 
 ### 1. Clone the repository
 
@@ -46,20 +95,14 @@ cd vehicle_manager
 
 ### 2. Configure environment variables
 
-Edit `docker-compose.yml` to set your environment variables (see section below), or use a `.env` file at the project root:
+Copy the example and fill in your values:
 
 ```bash
-# Example: create a .env file for Docker Compose
-cat > .env <<EOF
-POSTGRES_USER=sprinter
-POSTGRES_PASSWORD=your_secure_db_password
-POSTGRES_DB=vehicle_db
-JWT_ACCESS_SECRET=your-access-secret-min-32-characters-long!!
-JWT_REFRESH_SECRET=your-refresh-secret-min-32-characters-long!!
-CORS_ORIGIN=http://your-domain:5173
-ALLOWED_EMAIL_DOMAIN=example.com
-EOF
+cp .env.example .env
+# Edit .env with your values
 ```
+
+See [Environment Variables](#environment-variables) for all options.
 
 ### 3. Start all services
 
@@ -70,20 +113,19 @@ docker compose up -d --build
 This will:
 - Start PostgreSQL and wait until it's healthy
 - Build and start the backend (runs Prisma migrations automatically on startup)
-- Build and start the frontend (served via nginx)
+- Build and start the frontend (served via nginx on port 80)
 
 ### 4. Create the first admin user
 
-Register via the frontend at `http://your-server:5173/register` (email must match the domain set in `ALLOWED_EMAIL_DOMAIN`).
+Register via the frontend at `http://your-server/register` (email must match `ALLOWED_EMAIL_DOMAIN`).
 
 ### Access
 
 | Service | URL |
 |---------|-----|
-| Frontend | `http://your-server:5173` |
-| Backend API | `http://your-server:3001/api` |
-| API Docs (Swagger) | `http://your-server:3001/api-docs` |
-| Public Checklist | `http://your-server:5173/checklist/:vehicleId` |
+| Frontend | `http://your-server` |
+| API Docs (Swagger) | `http://your-server/api-docs` |
+| Public Checklist | `http://your-server/checklist/:vehicleId` |
 
 ---
 
