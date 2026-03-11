@@ -152,12 +152,6 @@ enum DamageVisibility {
   NO_DAMAGE
 }
 
-enum CleanlinessLevel {
-  CLEAN
-  SLIGHTLY_DIRTY
-  VERY_DIRTY
-}
-
 enum FuelLevel {
   OK
   LOW
@@ -170,14 +164,16 @@ model ChecklistSubmission {
   submittedAt       DateTime           @default(now()) @map("submitted_at")
   mileage           Int
   damageVisibility  DamageVisibility   @map("damage_visibility")
-  seatsCleanliness  CleanlinessLevel   @map("seats_cleanliness")
+  dashboardWarnings String[]           @default([]) @map("dashboard_warnings")
+  seatsDirty        Boolean            @default(false) @map("seats_dirty")
   smokedInVehicle   Boolean            @map("smoked_in_vehicle")
   foodLeftovers     Boolean            @map("food_leftovers")
-  cargoAreaClean    Boolean            @map("cargo_area_clean")
+  cargoAreaDirty    Boolean            @default(false) @map("cargo_area_dirty")
   freezerTempOk     Boolean            @map("freezer_temp_ok")
   chargingCablesOk  Boolean            @map("charging_cables_ok")
   deliveryNotesPresent Boolean?        @map("delivery_notes_present")
   fuelLevel         FuelLevel?         @map("fuel_level")
+  carWashNeeded     Boolean?           @map("car_wash_needed")
   notes             String?            @db.VarChar(1000)
   createdAt         DateTime           @default(now()) @map("created_at")
 

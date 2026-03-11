@@ -11,9 +11,10 @@ import type { Vehicle } from '../../types/vehicle.ts';
 import type { Driver } from '../../types/driver.ts';
 import {
   DAMAGE_VISIBILITY_LABELS,
-  CLEANLINESS_LABELS,
+  DASHBOARD_WARNING_LABELS,
   FUEL_LABELS,
 } from '../../types/checklist.ts';
+import type { DashboardWarning } from '../../types/checklist.ts';
 import { getApiErrorMessage } from '../../utils/apiError.ts';
 
 export function ChecklistListPage() {
@@ -265,10 +266,18 @@ export function ChecklistListPage() {
             <DetailRow label="Kilometerstand" value={selectedSubmission.mileage.toLocaleString('de-DE')} />
             <hr />
             <DetailRow label="Schäden sichtbar" value={DAMAGE_VISIBILITY_LABELS[selectedSubmission.damageVisibility]} />
-            <DetailRow label="Sitze/Flächen sauber" value={CLEANLINESS_LABELS[selectedSubmission.seatsCleanliness]} />
+            <DetailRow
+              label="Fehlermeldung Anzeigen"
+              value={
+                selectedSubmission.dashboardWarnings.length > 0
+                  ? selectedSubmission.dashboardWarnings.map((w: DashboardWarning) => DASHBOARD_WARNING_LABELS[w]).join(', ')
+                  : 'NEIN - alles ok'
+              }
+            />
+            <DetailRow label="Sitze/Flächen dreckig" value={yn(selectedSubmission.seatsDirty)} />
             <DetailRow label="Im Fahrzeug geraucht" value={yn(selectedSubmission.smokedInVehicle)} />
-            <DetailRow label="Essens-/Getränkereste" value={yn(selectedSubmission.foodLeftovers)} />
-            <DetailRow label="Ladefläche sauber" value={yn(selectedSubmission.cargoAreaClean)} />
+            <DetailRow label="Essensreste/Verpackungen" value={yn(selectedSubmission.foodLeftovers)} />
+            <DetailRow label="Ladefläche dreckig" value={yn(selectedSubmission.cargoAreaDirty)} />
             <DetailRow label="Tiefkühlraum-Temp. ok" value={yn(selectedSubmission.freezerTempOk)} />
             <DetailRow label="Ladekabel vorhanden" value={yn(selectedSubmission.chargingCablesOk)} />
             {selectedSubmission.deliveryNotesPresent !== null && (
@@ -276,6 +285,9 @@ export function ChecklistListPage() {
             )}
             {selectedSubmission.fuelLevel && (
               <DetailRow label="Tankfüllung" value={FUEL_LABELS[selectedSubmission.fuelLevel]} />
+            )}
+            {selectedSubmission.carWashNeeded !== null && (
+              <DetailRow label="Waschanlage nötig" value={yn(selectedSubmission.carWashNeeded)} />
             )}
             {selectedSubmission.notes && (
               <>

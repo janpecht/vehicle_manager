@@ -7,7 +7,8 @@ import { createChecklistSchema } from '../checklists/checklists.schemas.js';
 import { damageQuerySchema } from '../damages/damages.schemas.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { getIdParam } from '../utils/params.js';
-import { sendChecklistNotification } from '../utils/email.js';
+import { sendChecklistNotification, hasAlarmCondition } from '../utils/email.js';
+import type { ChecklistEmailData } from '../utils/email.js';
 import { upload } from '../utils/upload.js';
 import { config } from '../config.js';
 
@@ -46,25 +47,31 @@ router.post('/checklist', asyncHandler(async (req, res) => {
   const input = createChecklistSchema.parse(req.body);
   const submission = await checklistsService.createChecklist(input);
 
-  // Send email notification (fire-and-forget)
-  sendChecklistNotification({
+  // Send email notification only when alarm conditions are met
+  const emailData: ChecklistEmailData = {
     driverName: submission.driver.name,
     vehiclePlate: submission.vehicle.licensePlate,
     date: new Date(submission.submittedAt).toLocaleString('de-DE'),
     mileage: submission.mileage,
     damageVisibility: submission.damageVisibility,
-    seatsCleanliness: submission.seatsCleanliness,
+    dashboardWarnings: submission.dashboardWarnings,
+    seatsDirty: submission.seatsDirty,
     smokedInVehicle: submission.smokedInVehicle,
     foodLeftovers: submission.foodLeftovers,
-    cargoAreaClean: submission.cargoAreaClean,
+    cargoAreaDirty: submission.cargoAreaDirty,
     freezerTempOk: submission.freezerTempOk,
     chargingCablesOk: submission.chargingCablesOk,
     deliveryNotesPresent: submission.deliveryNotesPresent,
     fuelLevel: submission.fuelLevel,
+    carWashNeeded: submission.carWashNeeded,
     notes: submission.notes,
-  }).catch((err) => {
-    console.error('Failed to send checklist notification email:', err);
-  });
+  };
+
+  if (hasAlarmCondition(emailData)) {
+    sendChecklistNotification(emailData).catch((err) => {
+      console.error('Failed to send checklist notification email:', err);
+    });
+  }
 
   res.status(201).json(submission);
 }));

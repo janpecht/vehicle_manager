@@ -9,7 +9,7 @@ import type { Driver } from '../../types/driver.ts';
 import type { DamageMarking } from '../../types/damage.ts';
 import type {
   DamageVisibility,
-  CleanlinessLevel,
+  DashboardWarning,
   FuelLevel,
 } from '../../types/checklist.ts';
 import { useTranslation, type Lang } from './checklistI18n.ts';
@@ -30,14 +30,17 @@ export function PublicChecklistPage() {
   const [vehicleId, setVehicleId] = useState('');
   const [mileage, setMileage] = useState('');
   const [damageVisibility, setDamageVisibility] = useState<DamageVisibility | ''>('');
-  const [seatsCleanliness, setSeatsCleanliness] = useState<CleanlinessLevel | ''>('');
+  const [dashboardWarnings, setDashboardWarnings] = useState<DashboardWarning[]>([]);
+  const [dashboardNone, setDashboardNone] = useState(false);
+  const [seatsDirty, setSeatsDirty] = useState<boolean | null>(null);
   const [smokedInVehicle, setSmokedInVehicle] = useState<boolean | null>(null);
   const [foodLeftovers, setFoodLeftovers] = useState<boolean | null>(null);
-  const [cargoAreaClean, setCargoAreaClean] = useState<boolean | null>(null);
+  const [cargoAreaDirty, setCargoAreaDirty] = useState<boolean | null>(null);
   const [freezerTempOk, setFreezerTempOk] = useState<boolean | null>(null);
   const [chargingCablesOk, setChargingCablesOk] = useState<boolean | null>(null);
   const [deliveryNotesPresent, setDeliveryNotesPresent] = useState<boolean | null>(null);
   const [fuelLevel, setFuelLevel] = useState<FuelLevel | ''>('');
+  const [carWashNeeded, setCarWashNeeded] = useState<boolean | null>(null);
   const [notes, setNotes] = useState('');
 
   // Vehicle damages for display
@@ -79,15 +82,29 @@ export function PublicChecklistPage() {
     loadDamages(id);
   }
 
+  function handleDashboardWarningToggle(warning: DashboardWarning) {
+    setDashboardNone(false);
+    setDashboardWarnings((prev) =>
+      prev.includes(warning) ? prev.filter((w) => w !== warning) : [...prev, warning]
+    );
+  }
+
+  function handleDashboardNone() {
+    setDashboardNone(true);
+    setDashboardWarnings([]);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
     if (
       !driverId || !vehicleId || !mileage ||
-      !damageVisibility || !seatsCleanliness ||
+      !damageVisibility ||
+      (!dashboardNone && dashboardWarnings.length === 0) ||
+      seatsDirty === null ||
       smokedInVehicle === null || foodLeftovers === null ||
-      cargoAreaClean === null || freezerTempOk === null ||
+      cargoAreaDirty === null || freezerTempOk === null ||
       chargingCablesOk === null
     ) {
       setError(t('validationError'));
@@ -101,14 +118,16 @@ export function PublicChecklistPage() {
         vehicleId,
         mileage: parseInt(mileage, 10),
         damageVisibility,
-        seatsCleanliness,
+        dashboardWarnings,
+        seatsDirty,
         smokedInVehicle,
         foodLeftovers,
-        cargoAreaClean,
+        cargoAreaDirty,
         freezerTempOk,
         chargingCablesOk,
         ...(deliveryNotesPresent !== null ? { deliveryNotesPresent } : {}),
         ...(fuelLevel ? { fuelLevel } : {}),
+        ...(carWashNeeded !== null ? { carWashNeeded } : {}),
         ...(notes.trim() ? { notes: notes.trim() } : {}),
       });
 
@@ -312,16 +331,38 @@ export function PublicChecklistPage() {
             )}
           </FormSection>
 
-          {/* Sitze sauber */}
+          {/* Dashboard Warnings */}
+          <FormSection label={t('dashboardWarningsLabel')} required>
+            <CheckboxGroup
+              options={[
+                { value: 'OIL', label: t('dashboardOil'), checked: dashboardWarnings.includes('OIL') },
+                { value: 'AD_BLUE', label: t('dashboardAdBlue'), checked: dashboardWarnings.includes('AD_BLUE') },
+                { value: 'SONSTIGE', label: t('dashboardOther'), checked: dashboardWarnings.includes('SONSTIGE') },
+              ]}
+              onChange={(value) => handleDashboardWarningToggle(value as DashboardWarning)}
+            />
+            <div className="mt-1">
+              <label className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={dashboardNone}
+                  onChange={handleDashboardNone}
+                  className="h-4 w-4 rounded text-blue-600"
+                />
+                <span className="text-sm text-gray-700">{t('dashboardNone')}</span>
+              </label>
+            </div>
+          </FormSection>
+
+          {/* Sitze dreckig */}
           <FormSection label={t('seatsLabel')} required>
             <RadioGroup
-              name="seatsCleanliness"
-              value={seatsCleanliness}
-              onChange={(v) => setSeatsCleanliness(v as CleanlinessLevel)}
+              name="seatsDirty"
+              value={seatsDirty === null ? '' : seatsDirty ? 'true' : 'false'}
+              onChange={(v) => setSeatsDirty(v === 'true')}
               options={[
-                { value: 'CLEAN', label: t('seatsClean') },
-                { value: 'SLIGHTLY_DIRTY', label: t('seatsSlightlyDirty') },
-                { value: 'VERY_DIRTY', label: t('seatsVeryDirty') },
+                { value: 'true', label: t('seatsYes') },
+                { value: 'false', label: t('seatsNo') },
               ]}
             />
           </FormSection>
@@ -355,9 +396,9 @@ export function PublicChecklistPage() {
           {/* Ladefläche */}
           <FormSection label={t('cargoLabel')} required>
             <RadioGroup
-              name="cargoAreaClean"
-              value={cargoAreaClean === null ? '' : cargoAreaClean ? 'true' : 'false'}
-              onChange={(v) => setCargoAreaClean(v === 'true')}
+              name="cargoAreaDirty"
+              value={cargoAreaDirty === null ? '' : cargoAreaDirty ? 'true' : 'false'}
+              onChange={(v) => setCargoAreaDirty(v === 'true')}
               options={[
                 { value: 'true', label: t('yes') },
                 { value: 'false', label: t('no') },
@@ -372,8 +413,8 @@ export function PublicChecklistPage() {
               value={freezerTempOk === null ? '' : freezerTempOk ? 'true' : 'false'}
               onChange={(v) => setFreezerTempOk(v === 'true')}
               options={[
-                { value: 'true', label: t('yes') },
-                { value: 'false', label: t('no') },
+                { value: 'true', label: t('freezerYes') },
+                { value: 'false', label: t('freezerNo') },
               ]}
             />
           </FormSection>
@@ -385,8 +426,8 @@ export function PublicChecklistPage() {
               value={chargingCablesOk === null ? '' : chargingCablesOk ? 'true' : 'false'}
               onChange={(v) => setChargingCablesOk(v === 'true')}
               options={[
-                { value: 'true', label: t('yes') },
-                { value: 'false', label: t('no') },
+                { value: 'true', label: t('cablesYes') },
+                { value: 'false', label: t('cablesNo') },
               ]}
             />
           </FormSection>
@@ -398,8 +439,8 @@ export function PublicChecklistPage() {
               value={deliveryNotesPresent === null ? '' : deliveryNotesPresent ? 'true' : 'false'}
               onChange={(v) => setDeliveryNotesPresent(v === 'true')}
               options={[
-                { value: 'true', label: t('yes') },
-                { value: 'false', label: t('no') },
+                { value: 'true', label: t('deliveryNotesYes') },
+                { value: 'false', label: t('deliveryNotesNo') },
               ]}
             />
           </FormSection>
@@ -413,6 +454,19 @@ export function PublicChecklistPage() {
               options={[
                 { value: 'OK', label: t('fuelOk') },
                 { value: 'LOW', label: t('fuelLow') },
+              ]}
+            />
+          </FormSection>
+
+          {/* Waschanlage (optional) */}
+          <FormSection label={t('carWashLabel')}>
+            <RadioGroup
+              name="carWashNeeded"
+              value={carWashNeeded === null ? '' : carWashNeeded ? 'true' : 'false'}
+              onChange={(v) => setCarWashNeeded(v === 'true')}
+              options={[
+                { value: 'true', label: t('carWashYes') },
+                { value: 'false', label: t('carWashNo') },
               ]}
             />
           </FormSection>
@@ -510,6 +564,30 @@ function RadioGroup({
             checked={value === opt.value}
             onChange={() => onChange(opt.value)}
             className="h-4 w-4 text-blue-600"
+          />
+          <span className="text-sm text-gray-700">{opt.label}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+function CheckboxGroup({
+  options,
+  onChange,
+}: {
+  options: { value: string; label: string; checked: boolean }[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      {options.map((opt) => (
+        <label key={opt.value} className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-gray-50">
+          <input
+            type="checkbox"
+            checked={opt.checked}
+            onChange={() => onChange(opt.value)}
+            className="h-4 w-4 rounded text-blue-600"
           />
           <span className="text-sm text-gray-700">{opt.label}</span>
         </label>

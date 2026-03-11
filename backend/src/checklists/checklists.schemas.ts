@@ -5,14 +5,16 @@ export const createChecklistSchema = z.object({
   vehicleId: z.string().uuid(),
   mileage: z.number().int().min(0),
   damageVisibility: z.enum(['NEW_DAMAGE', 'KNOWN_DAMAGE', 'NO_DAMAGE']),
-  seatsCleanliness: z.enum(['CLEAN', 'SLIGHTLY_DIRTY', 'VERY_DIRTY']),
+  dashboardWarnings: z.array(z.enum(['OIL', 'AD_BLUE', 'SONSTIGE'])).default([]),
+  seatsDirty: z.boolean(),
   smokedInVehicle: z.boolean(),
   foodLeftovers: z.boolean(),
-  cargoAreaClean: z.boolean(),
+  cargoAreaDirty: z.boolean(),
   freezerTempOk: z.boolean(),
   chargingCablesOk: z.boolean(),
   deliveryNotesPresent: z.boolean().optional(),
   fuelLevel: z.enum(['OK', 'LOW']).optional(),
+  carWashNeeded: z.boolean().optional(),
   notes: z.string().max(1000).optional(),
 });
 

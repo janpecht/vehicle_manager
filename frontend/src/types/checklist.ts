@@ -2,7 +2,7 @@ import type { Driver } from './driver.ts';
 import type { Vehicle } from './vehicle.ts';
 
 export type DamageVisibility = 'NEW_DAMAGE' | 'KNOWN_DAMAGE' | 'NO_DAMAGE';
-export type CleanlinessLevel = 'CLEAN' | 'SLIGHTLY_DIRTY' | 'VERY_DIRTY';
+export type DashboardWarning = 'OIL' | 'AD_BLUE' | 'SONSTIGE';
 export type FuelLevel = 'OK' | 'LOW';
 
 export interface ChecklistSubmission {
@@ -12,14 +12,16 @@ export interface ChecklistSubmission {
   submittedAt: string;
   mileage: number;
   damageVisibility: DamageVisibility;
-  seatsCleanliness: CleanlinessLevel;
+  dashboardWarnings: DashboardWarning[];
+  seatsDirty: boolean;
   smokedInVehicle: boolean;
   foodLeftovers: boolean;
-  cargoAreaClean: boolean;
+  cargoAreaDirty: boolean;
   freezerTempOk: boolean;
   chargingCablesOk: boolean;
   deliveryNotesPresent: boolean | null;
   fuelLevel: FuelLevel | null;
+  carWashNeeded: boolean | null;
   notes: string | null;
   createdAt: string;
   driver: Driver;
@@ -47,14 +49,16 @@ export interface CreateChecklistInput {
   vehicleId: string;
   mileage: number;
   damageVisibility: DamageVisibility;
-  seatsCleanliness: CleanlinessLevel;
+  dashboardWarnings: DashboardWarning[];
+  seatsDirty: boolean;
   smokedInVehicle: boolean;
   foodLeftovers: boolean;
-  cargoAreaClean: boolean;
+  cargoAreaDirty: boolean;
   freezerTempOk: boolean;
   chargingCablesOk: boolean;
   deliveryNotesPresent?: boolean;
   fuelLevel?: FuelLevel;
+  carWashNeeded?: boolean;
   notes?: string;
 }
 
@@ -64,10 +68,10 @@ export const DAMAGE_VISIBILITY_LABELS: Record<DamageVisibility, string> = {
   NO_DAMAGE: 'NEIN',
 };
 
-export const CLEANLINESS_LABELS: Record<CleanlinessLevel, string> = {
-  CLEAN: 'JA',
-  SLIGHTLY_DIRTY: 'NEIN - leicht verdreckt',
-  VERY_DIRTY: 'NEIN - stark verdreckt',
+export const DASHBOARD_WARNING_LABELS: Record<DashboardWarning, string> = {
+  OIL: 'Ölanzeige',
+  AD_BLUE: 'Ad Blue',
+  SONSTIGE: 'Sonstige',
 };
 
 export const FUEL_LABELS: Record<FuelLevel, string> = {
