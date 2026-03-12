@@ -55,8 +55,8 @@ services:
       dockerfile: frontend/Dockerfile
     container_name: sprinter-frontend
     restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-80}:80"
+    expose:
+      - "80"
     depends_on:
       - backend
 
