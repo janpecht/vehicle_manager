@@ -57,7 +57,12 @@ function isSmtpConfigured(): boolean {
 }
 
 export async function sendChecklistNotification(data: ChecklistEmailData): Promise<void> {
-  if (!isSmtpConfigured()) return;
+  if (!isSmtpConfigured()) {
+    console.log(`[EMAIL] SMTP not configured or CHECKLIST_NOTIFY_EMAIL not set — skipping checklist notification`);
+    return;
+  }
+
+  console.log(`[EMAIL] Sending checklist notification for ${data.vehiclePlate} to ${config.CHECKLIST_NOTIFY_EMAIL}`);
 
   const transporter = nodemailer.createTransport({
     host: config.SMTP_HOST,
@@ -103,10 +108,16 @@ export async function sendChecklistNotification(data: ChecklistEmailData): Promi
   const isAlarm = hasAlarmCondition(data);
   const subject = `${isAlarm ? '[ALARM] ' : ''}KFZ Checklist: ${data.vehiclePlate} - ${data.driverName} (${data.date})`;
 
-  await transporter.sendMail({
-    from: config.SMTP_FROM ?? config.SMTP_USER ?? 'noreply@example.com',
-    to: config.CHECKLIST_NOTIFY_EMAIL!,
-    subject,
-    text: lines.join('\n'),
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: config.SMTP_FROM ?? config.SMTP_USER ?? 'noreply@example.com',
+      to: config.CHECKLIST_NOTIFY_EMAIL!,
+      subject,
+      text: lines.join('\n'),
+    });
+    console.log(`[EMAIL] Checklist notification sent successfully to ${config.CHECKLIST_NOTIFY_EMAIL} (messageId: ${info.messageId})`);
+  } catch (err) {
+    console.error(`[EMAIL] Failed to send checklist notification:`, err);
+    throw err;
+  }
 }

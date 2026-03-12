@@ -11,6 +11,8 @@ export async function sendVerificationEmail(to: string, code: string, name: stri
     return;
   }
 
+  console.log(`[EMAIL] Sending verification email to ${to} via ${config.SMTP_HOST}:${config.SMTP_PORT}`);
+
   const transporter = nodemailer.createTransport({
     host: config.SMTP_HOST,
     port: config.SMTP_PORT,
@@ -34,10 +36,16 @@ export async function sendVerificationEmail(to: string, code: string, name: stri
     'Fahrzeugmanager',
   ].join('\n');
 
-  await transporter.sendMail({
-    from: config.SMTP_FROM ?? config.SMTP_USER ?? 'noreply@example.com',
-    to,
-    subject,
-    text,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: config.SMTP_FROM ?? config.SMTP_USER ?? 'noreply@example.com',
+      to,
+      subject,
+      text,
+    });
+    console.log(`[EMAIL] Verification email sent successfully to ${to} (messageId: ${info.messageId})`);
+  } catch (err) {
+    console.error(`[EMAIL] Failed to send verification email to ${to}:`, err);
+    throw err;
+  }
 }

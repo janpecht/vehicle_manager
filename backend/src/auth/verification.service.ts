@@ -27,7 +27,11 @@ export async function createAndSendCode(userId: string, email: string, name: str
     },
   });
 
-  await sendVerificationEmail(email, code, name);
+  // Send email fire-and-forget — code is already stored in DB,
+  // user can request a new one if delivery fails
+  sendVerificationEmail(email, code, name).catch(() => {
+    // Error already logged inside sendVerificationEmail
+  });
 }
 
 export async function verifyCode(userId: string, code: string): Promise<void> {
