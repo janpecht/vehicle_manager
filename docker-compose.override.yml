@@ -1,0 +1,10 @@
+# Local development overrides — NOT used in production/Dokploy
+# Exposes postgres on localhost for native development and testing
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
