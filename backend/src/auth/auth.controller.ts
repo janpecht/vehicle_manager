@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import * as authService from './auth.service.js';
 import { config } from '../config.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import type { RegisterInput, LoginInput } from './auth.schemas.js';
+import type { RegisterInput, LoginInput, VerifyEmailInput, ResendCodeInput } from './auth.schemas.js';
 
 const REFRESH_COOKIE_NAME = 'refresh_token';
 const REFRESH_COOKIE_PATH = '/auth';
@@ -28,10 +28,8 @@ function clearRefreshCookie(res: Response): void {
 
 export const register = asyncHandler(async (req, res) => {
   const input = req.body as RegisterInput;
-  const { user, tokens } = await authService.register(input);
-
-  setRefreshCookie(res, tokens.refreshToken);
-  res.status(201).json({ user, accessToken: tokens.accessToken });
+  const result = await authService.register(input);
+  res.status(201).json(result);
 });
 
 export const login = asyncHandler(async (req, res) => {
@@ -40,6 +38,20 @@ export const login = asyncHandler(async (req, res) => {
 
   setRefreshCookie(res, tokens.refreshToken);
   res.json({ user, accessToken: tokens.accessToken });
+});
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const { email, code } = req.body as VerifyEmailInput;
+  const { user, tokens } = await authService.verifyEmail(email, code);
+
+  setRefreshCookie(res, tokens.refreshToken);
+  res.json({ user, accessToken: tokens.accessToken });
+});
+
+export const resendCode = asyncHandler(async (req, res) => {
+  const { email } = req.body as ResendCodeInput;
+  await authService.resendVerificationCode(email);
+  res.json({ message: 'Falls die E-Mail registriert und nicht verifiziert ist, wurde ein neuer Code gesendet.' });
 });
 
 export const refreshToken = asyncHandler(async (req, res) => {

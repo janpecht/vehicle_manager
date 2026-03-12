@@ -1,14 +1,23 @@
 import api from './api.ts';
-import type { AuthResponse, RegisterInput, LoginInput, User } from '../types/auth.ts';
+import type { AuthResponse, RegisterResponse, RegisterInput, LoginInput, User } from '../types/auth.ts';
 
-export async function register(input: RegisterInput): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>('/auth/register', input);
+export async function register(input: RegisterInput): Promise<RegisterResponse> {
+  const { data } = await api.post<RegisterResponse>('/auth/register', input);
   return data;
 }
 
 export async function login(input: LoginInput): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>('/auth/login', input);
   return data;
+}
+
+export async function verifyEmail(input: { email: string; code: string }): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>('/auth/verify-email', input);
+  return data;
+}
+
+export async function resendVerificationCode(email: string): Promise<void> {
+  await api.post('/auth/resend-code', { email });
 }
 
 export async function refresh(): Promise<AuthResponse> {

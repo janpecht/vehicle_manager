@@ -10,6 +10,11 @@ export interface AuthResponse {
   accessToken: string;
 }
 
+export interface RegisterResponse {
+  user: User;
+  requiresVerification: boolean;
+}
+
 export interface RegisterInput {
   email: string;
   password: string;

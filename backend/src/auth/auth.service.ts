@@ -1,13 +1,14 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../db.js';
 import { config } from '../config.js';
-import { AuthError, ConflictError } from '../utils/errors.js';
+import { AuthError, ConflictError, EmailNotVerifiedError } from '../utils/errors.js';
 import {
   generateAccessToken,
   generateRefreshToken,
   hashRefreshToken,
   getRefreshTokenExpiresAt,
 } from '../utils/tokens.js';
+import { createAndSendCode, verifyCode } from './verification.service.js';
 import type { RegisterInput, LoginInput } from './auth.schemas.js';
 
 export interface AuthTokens {
@@ -43,7 +44,7 @@ async function createTokenPair(userId: string, email: string, role: string): Pro
 
 export async function register(
   input: RegisterInput,
-): Promise<{ user: UserResponse; tokens: AuthTokens }> {
+): Promise<{ user: UserResponse; requiresVerification: boolean }> {
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) {
     throw new ConflictError('Email already registered');
@@ -59,8 +60,10 @@ export async function register(
     },
   });
 
-  const tokens = await createTokenPair(user.id, user.email, user.role);
-  return { user: toUserResponse(user), tokens };
+  // Send verification code instead of issuing tokens
+  await createAndSendCode(user.id, user.email, user.name);
+
+  return { user: toUserResponse(user), requiresVerification: true };
 }
 
 export async function login(
@@ -76,8 +79,37 @@ export async function login(
     throw new AuthError('Invalid email or password');
   }
 
+  if (!user.emailVerified) {
+    throw new EmailNotVerifiedError();
+  }
+
   const tokens = await createTokenPair(user.id, user.email, user.role);
   return { user: toUserResponse(user), tokens };
+}
+
+export async function verifyEmail(
+  email: string,
+  code: string,
+): Promise<{ user: UserResponse; tokens: AuthTokens }> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw new AuthError('Ungültige E-Mail-Adresse');
+  }
+
+  await verifyCode(user.id, code);
+
+  // Reload user after verification
+  const verifiedUser = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+  const tokens = await createTokenPair(verifiedUser.id, verifiedUser.email, verifiedUser.role);
+  return { user: toUserResponse(verifiedUser), tokens };
+}
+
+export async function resendVerificationCode(email: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  // Silent success for unknown emails or already verified users (prevent enumeration)
+  if (!user || user.emailVerified) return;
+
+  await createAndSendCode(user.id, user.email, user.name);
 }
 
 export async function refresh(rawToken: string): Promise<{ user: UserResponse; tokens: AuthTokens }> {
@@ -116,4 +148,3 @@ export async function getMe(userId: string): Promise<UserResponse> {
   }
   return toUserResponse(user);
 }
-

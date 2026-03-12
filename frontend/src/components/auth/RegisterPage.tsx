@@ -4,14 +4,12 @@ import { AuthLayout } from './AuthLayout.tsx';
 import { Input } from '../ui/Input.tsx';
 import { Button } from '../ui/Button.tsx';
 import { Alert } from '../ui/Alert.tsx';
-import { useAuthStore } from '../../stores/authStore.ts';
 import * as authService from '../../services/auth.service.ts';
 import type { ApiError } from '../../types/auth.ts';
 import axios from 'axios';
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const setAuth = useAuthStore((s) => s.setAuth);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -34,9 +32,9 @@ export function RegisterPage() {
     setLoading(true);
 
     try {
-      const data = await authService.register({ email, password, name });
-      setAuth(data.user, data.accessToken);
-      navigate('/', { replace: true });
+      await authService.register({ email, password, name });
+      // Redirect to verification page
+      navigate('/verify-email', { state: { email }, replace: true });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
         const apiError = err.response.data as ApiError;

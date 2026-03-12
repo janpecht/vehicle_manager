@@ -21,6 +21,9 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional().transform((v) => v || undefined),
   CHECKLIST_NOTIFY_EMAIL: z.string().email().optional().or(z.literal('')).transform((v) => v || undefined),
 
+  // Email verification
+  VERIFICATION_CODE_EXPIRES_MINUTES: z.coerce.number().int().positive().default(15),
+
   // Restrict registration to this email domain (e.g. "example.com")
   ALLOWED_EMAIL_DOMAIN: z.string().min(1, 'ALLOWED_EMAIL_DOMAIN is required (e.g. "example.com")'),
 });

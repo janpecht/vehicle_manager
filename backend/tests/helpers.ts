@@ -15,10 +15,21 @@ export async function createTestUser(
   password = 'Test1234',
   name = 'Test User',
 ): Promise<TestUserResult> {
-  const res = await request(app).post('/auth/register').send({ email, password, name });
+  // Register user
+  const regRes = await request(app).post('/auth/register').send({ email, password, name });
+  const userId = regRes.body.user.id;
+
+  // Directly verify email in DB (skip email verification flow in tests)
+  await prisma.user.update({ where: { id: userId }, data: { emailVerified: true } });
+
+  // Clean up verification codes
+  await prisma.emailVerificationCode.deleteMany({ where: { userId } });
+
+  // Login to get tokens
+  const loginRes = await request(app).post('/auth/login').send({ email, password });
   return {
-    accessToken: res.body.accessToken,
-    userId: res.body.user.id,
+    accessToken: loginRes.body.accessToken,
+    userId,
   };
 }
 

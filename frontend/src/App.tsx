@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { LoginPage } from './components/auth/LoginPage.tsx';
 import { RegisterPage } from './components/auth/RegisterPage.tsx';
+import { VerifyEmailPage } from './components/auth/VerifyEmailPage.tsx';
 import { ProtectedRoute } from './components/layout/ProtectedRoute.tsx';
 import { AppLayout } from './components/layout/AppLayout.tsx';
 import { LoadingSpinner } from './components/ui/LoadingSpinner.tsx';
@@ -38,6 +39,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route
         element={
           <ProtectedRoute>

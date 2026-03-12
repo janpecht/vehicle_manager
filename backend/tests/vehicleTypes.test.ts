@@ -212,7 +212,7 @@ describe('POST /api/vehicle-types/:id/images/:side', () => {
       .attach('image', Buffer.from('fake-png-data'), { filename: 'front.png', contentType: 'image/png' });
 
     expect(res.status).toBe(200);
-    expect(res.body.vehicleType.frontImage).toMatch(/^\/uploads\/.+\.png$/);
+    expect(res.body.vehicleType.frontImage).toMatch(/^\/api\/vehicle-type-images\/.+\/front\?v=\d+$/);
   });
 
   it('should reject invalid side', async () => {

@@ -1,0 +1,43 @@
+import nodemailer from 'nodemailer';
+import { config } from '../config.js';
+
+function isSmtpConfigured(): boolean {
+  return !!(config.SMTP_HOST && config.SMTP_PORT);
+}
+
+export async function sendVerificationEmail(to: string, code: string, name: string): Promise<void> {
+  if (!isSmtpConfigured()) {
+    console.log(`[DEV] Verification code for ${to}: ${code}`);
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: config.SMTP_HOST,
+    port: config.SMTP_PORT,
+    secure: config.SMTP_SECURE,
+    ...(config.SMTP_USER && config.SMTP_PASS
+      ? { auth: { user: config.SMTP_USER, pass: config.SMTP_PASS } }
+      : {}),
+  });
+
+  const subject = 'Ihr Bestätigungscode - Fahrzeugmanager';
+
+  const text = [
+    `Hallo ${name},`,
+    '',
+    `Ihr Bestätigungscode lautet: ${code}`,
+    '',
+    `Dieser Code ist ${config.VERIFICATION_CODE_EXPIRES_MINUTES} Minuten gültig.`,
+    '',
+    'Bitte geben Sie diesen Code nicht an Dritte weiter.',
+    '',
+    'Fahrzeugmanager',
+  ].join('\n');
+
+  await transporter.sendMail({
+    from: config.SMTP_FROM ?? config.SMTP_USER ?? 'noreply@example.com',
+    to,
+    subject,
+    text,
+  });
+}

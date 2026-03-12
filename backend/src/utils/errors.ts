@@ -43,3 +43,10 @@ export class ConflictError extends AppError {
     this.name = 'ConflictError';
   }
 }
+
+export class EmailNotVerifiedError extends AppError {
+  constructor(message = 'Please verify your email address before logging in') {
+    super(message, 403, 'EMAIL_NOT_VERIFIED');
+    this.name = 'EmailNotVerifiedError';
+  }
+}
