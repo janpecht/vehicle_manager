@@ -72,7 +72,13 @@ export function SprinterCanvas({
 
   const bgImage = useImage(backgroundImageUrl);
   const view = getSprinterView(viewSide);
-  const { viewBox } = view;
+
+  // When a custom background image is loaded, use its natural aspect ratio
+  // to avoid stretching/distortion. The viewBox is adjusted so the image
+  // fills it exactly while keeping the same coordinate scale.
+  const viewBox = bgImage
+    ? { width: bgImage.naturalWidth, height: bgImage.naturalHeight }
+    : view.viewBox;
   const aspectRatio = viewBox.width / viewBox.height;
 
   const updateDimensions = useCallback(() => {
