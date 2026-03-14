@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: sprinter-postgres
+
     restart: unless-stopped
     # No external ports — only accessible within Docker network
     expose:
@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: sprinter-backend
+
     restart: unless-stopped
     # No external ports — nginx proxies to backend internally
     expose:
@@ -53,7 +53,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    container_name: sprinter-frontend
+
     restart: unless-stopped
     expose:
       - "80"
