@@ -9,6 +9,9 @@ import * as vehicleService from '../../services/vehicle.service.ts';
 import type { Vehicle, PaginatedVehicles } from '../../types/vehicle.ts';
 import { toast } from 'sonner';
 import { getApiErrorMessage } from '../../utils/apiError.ts';
+import QRCode from 'qrcode';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 export function VehicleListPage() {
   const navigate = useNavigate();
@@ -81,6 +84,32 @@ export function VehicleListPage() {
     } catch (err) {
       setError(getApiErrorMessage(err, 'Fehler beim Aktualisieren'));
     }
+  }
+
+  function getChecklistUrl(vehicleId: string): string {
+    return `${window.location.origin}/checklist/${vehicleId}`;
+  }
+
+  async function copyChecklistLink(vehicle: Vehicle) {
+    const url = getChecklistUrl(vehicle.id);
+    await navigator.clipboard.writeText(url);
+    toast.success(`Checklist-Link für ${vehicle.licensePlate} kopiert`);
+  }
+
+  async function downloadQrCode(vehicle: Vehicle) {
+    const url = getChecklistUrl(vehicle.id);
+    const safePlate = vehicle.licensePlate.replace(/\s+/g, '_');
+
+    const svgString = await QRCode.toString(url, { type: 'svg', margin: 1 });
+    const pngDataUrl = await QRCode.toDataURL(url, { type: 'image/png', width: 512, margin: 1 });
+    const pngData = await fetch(pngDataUrl).then((r) => r.arrayBuffer());
+
+    const zip = new JSZip();
+    zip.file(`QR_${safePlate}.svg`, svgString);
+    zip.file(`QR_${safePlate}.png`, pngData);
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    saveAs(blob, `QR_${safePlate}.zip`);
   }
 
   async function handleDelete() {
@@ -222,6 +251,24 @@ export function VehicleListPage() {
                     {new Date(vehicle.createdAt).toLocaleDateString('de-DE')}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
+                    <button
+                      onClick={() => copyChecklistLink(vehicle)}
+                      className="mr-2 inline-flex items-center justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-blue-600"
+                      title="Checklist-Link kopieren"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => downloadQrCode(vehicle)}
+                      className="mr-3 inline-flex items-center justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-blue-600"
+                      title="QR-Code herunterladen"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14h3v3h-3zM14 17h3v3h-3zM17 20h3v0h-3z" />
+                      </svg>
+                    </button>
                     <button
                       onClick={() => navigate(`/vehicles/${vehicle.id}`)}
                       className="mr-3 font-medium text-blue-600 hover:text-blue-500"

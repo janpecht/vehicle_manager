@@ -79,7 +79,6 @@ export async function createVehicle(input: CreateVehicleInput) {
     data: {
       licensePlate: input.licensePlate,
       label: input.label ?? null,
-      formLink: input.formLink || null,
       vehicleTypeId: input.vehicleTypeId ?? null,
     },
     include: vehicleInclude,
@@ -106,7 +105,6 @@ export async function updateVehicle(
     data: {
       ...(input.licensePlate !== undefined && { licensePlate: input.licensePlate }),
       ...(input.label !== undefined && { label: input.label }),
-      ...(input.formLink !== undefined && { formLink: input.formLink || null }),
       ...(input.vehicleTypeId !== undefined && { vehicleTypeId: input.vehicleTypeId }),
       ...(input.isActive !== undefined && { isActive: input.isActive }),
     },

@@ -81,10 +81,19 @@ export function ChecklistListPage() {
     setSelectedSubmission(sub);
     setPhotos([]);
     setLoadingPhotos(true);
-    checklistService.listChecklistPhotos(sub.id)
-      .then(setPhotos)
-      .catch(() => setPhotos([]))
-      .finally(() => setLoadingPhotos(false));
+
+    // Fetch full detail (includes previous driver) and photos in parallel
+    Promise.all([
+      checklistService.getChecklist(sub.id),
+      checklistService.listChecklistPhotos(sub.id),
+    ]).then(([detail, photoList]) => {
+      setSelectedSubmission(detail);
+      setPhotos(photoList);
+    }).catch(() => {
+      setPhotos([]);
+    }).finally(() => {
+      setLoadingPhotos(false);
+    });
   }
 
   function resetFilters() {
@@ -264,6 +273,18 @@ export function ChecklistListPage() {
             <DetailRow label="Fahrer/in" value={selectedSubmission.driver.name} />
             <DetailRow label="Fahrzeug" value={selectedSubmission.vehicle.licensePlate} />
             <DetailRow label="Kilometerstand" value={selectedSubmission.mileage.toLocaleString('de-DE')} />
+            {selectedSubmission.previousDriverName && (
+              <>
+                <hr />
+                <DetailRow label="Vorheriger Fahrer" value={selectedSubmission.previousDriverName} />
+                <DetailRow
+                  label="Letzte Übergabe"
+                  value={selectedSubmission.previousSubmissionDate
+                    ? new Date(selectedSubmission.previousSubmissionDate).toLocaleString('de-DE')
+                    : '-'}
+                />
+              </>
+            )}
             <hr />
             <DetailRow label="Schäden sichtbar" value={DAMAGE_VISIBILITY_LABELS[selectedSubmission.damageVisibility]} />
             <DetailRow

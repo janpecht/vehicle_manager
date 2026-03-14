@@ -26,6 +26,8 @@ export interface ChecklistSubmission {
   createdAt: string;
   driver: Driver;
   vehicle: Vehicle;
+  previousDriverName: string | null;
+  previousSubmissionDate: string | null;
 }
 
 export interface ChecklistPhoto {

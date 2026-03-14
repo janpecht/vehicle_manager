@@ -22,7 +22,6 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
 
   const [licensePlate, setLicensePlate] = useState('');
   const [label, setLabel] = useState('');
-  const [formLink, setFormLink] = useState('');
   const [vehicleTypeId, setVehicleTypeId] = useState('');
   const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
   const [error, setError] = useState('');
@@ -33,7 +32,6 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
     if (open) {
       setLicensePlate(vehicle?.licensePlate ?? '');
       setLabel(vehicle?.label ?? '');
-      setFormLink(vehicle?.formLink ?? '');
       setVehicleTypeId(vehicle?.vehicleTypeId ?? '');
       setError('');
       setFieldErrors({});
@@ -52,14 +50,12 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
         await vehicleService.updateVehicle(vehicle.id, {
           licensePlate,
           label: label || null,
-          formLink: formLink || null,
           vehicleTypeId: vehicleTypeId || null,
         });
       } else {
         await vehicleService.createVehicle({
           licensePlate,
           label: label || undefined,
-          formLink: formLink || undefined,
           vehicleTypeId: vehicleTypeId || undefined,
         });
       }
@@ -105,14 +101,6 @@ export function VehicleDialog({ open, onClose, onSaved, vehicle }: VehicleDialog
           onChange={(e) => setLabel(e.target.value)}
           error={fieldErrors['label']}
           placeholder="z.B. Sprinter #1"
-        />
-        <Input
-          label="Formular-Link (optional)"
-          type="url"
-          value={formLink}
-          onChange={(e) => setFormLink(e.target.value)}
-          error={fieldErrors['formLink']}
-          placeholder="https://example.com/form"
         />
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { LoadingSpinner } from '../ui/LoadingSpinner.tsx';
 import { Alert } from '../ui/Alert.tsx';
 import { SprinterCanvas } from '../damage-canvas/SprinterCanvas.tsx';
@@ -15,6 +16,7 @@ import type {
 import { useTranslation, type Lang } from './checklistI18n.ts';
 
 export function PublicChecklistPage() {
+  const { vehicleId: preselectedVehicleId } = useParams<{ vehicleId: string }>();
   const [lang, setLang] = useState<Lang>('de');
   const t = useTranslation(lang);
 
@@ -55,6 +57,11 @@ export function PublicChecklistPage() {
       .then(([v, d]) => {
         setVehicles(v);
         setDrivers(d);
+        // Pre-select vehicle from URL param
+        if (preselectedVehicleId && v.some((veh) => veh.id === preselectedVehicleId)) {
+          setVehicleId(preselectedVehicleId);
+          loadDamages(preselectedVehicleId);
+        }
       })
       .catch(() => setError(t('loadError')))
       .finally(() => setLoading(false));
@@ -212,8 +219,9 @@ export function PublicChecklistPage() {
             <select
               value={vehicleId}
               onChange={(e) => handleVehicleChange(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
               required
+              disabled={!!preselectedVehicleId}
             >
               <option value="">{t('selectPlaceholder')}</option>
               {vehicles.map((v) => (

@@ -117,16 +117,6 @@ export function VehicleDetailPage() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{vehicle.licensePlate}</h2>
             {vehicle.label && <p className="text-sm text-gray-500">{vehicle.label}</p>}
-            {vehicle.formLink && (
-              <a
-                href={vehicle.formLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:text-blue-500 hover:underline"
-              >
-                Schadensformular
-              </a>
-            )}
           </div>
         </div>
         <div className="flex items-center gap-2">

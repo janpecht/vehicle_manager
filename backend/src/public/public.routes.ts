@@ -47,6 +47,12 @@ router.post('/checklist', asyncHandler(async (req, res) => {
   const input = createChecklistSchema.parse(req.body);
   const submission = await checklistsService.createChecklist(input);
 
+  // Look up previous submission for this vehicle
+  const previous = await checklistsService.getPreviousSubmission(
+    submission.vehicleId,
+    submission.id,
+  );
+
   // Send email notification only when alarm conditions are met
   const emailData: ChecklistEmailData = {
     driverName: submission.driver.name,
@@ -65,6 +71,10 @@ router.post('/checklist', asyncHandler(async (req, res) => {
     fuelLevel: submission.fuelLevel,
     carWashNeeded: submission.carWashNeeded,
     notes: submission.notes,
+    previousDriverName: previous?.driver.name ?? null,
+    previousSubmissionDate: previous
+      ? new Date(previous.submittedAt).toLocaleString('de-DE')
+      : null,
   };
 
   if (hasAlarmCondition(emailData)) {
@@ -73,7 +83,14 @@ router.post('/checklist', asyncHandler(async (req, res) => {
     });
   }
 
-  res.status(201).json(submission);
+  // Include previous driver info in response
+  const responseData = {
+    ...submission,
+    previousDriverName: previous?.driver.name ?? null,
+    previousSubmissionDate: previous?.submittedAt ?? null,
+  };
+
+  res.status(201).json(responseData);
 }));
 
 /** POST /public/checklist/:id/photos — upload damage photos for a submission */

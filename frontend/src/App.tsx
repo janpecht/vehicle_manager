@@ -57,6 +57,7 @@ function AppRoutes() {
       {/* Public routes — no login required */}
       <Route path="/report/vehicles/:id" element={<PublicReportPage />} />
       <Route path="/checklist" element={<PublicChecklistPage />} />
+      <Route path="/checklist/:vehicleId" element={<PublicChecklistPage />} />
       {/* Embed route — no AppLayout chrome, just the report */}
       <Route
         path="/embed/vehicles/:id"

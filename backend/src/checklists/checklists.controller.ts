@@ -12,7 +12,15 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
 
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   const submission = await checklistsService.getChecklist(getIdParam(req));
-  res.json(submission);
+  const previous = await checklistsService.getPreviousSubmission(
+    submission.vehicleId,
+    submission.id,
+  );
+  res.json({
+    ...submission,
+    previousDriverName: previous?.driver.name ?? null,
+    previousSubmissionDate: previous?.submittedAt ?? null,
+  });
 });
 
 export const listPhotos = asyncHandler(async (req: Request, res: Response) => {

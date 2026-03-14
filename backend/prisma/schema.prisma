@@ -92,7 +92,6 @@ model Vehicle {
   id            String   @id @default(uuid()) @db.Uuid
   licensePlate  String   @unique @map("license_plate")
   label         String?
-  formLink      String?  @map("form_link")
   vehicleTypeId String?  @map("vehicle_type_id") @db.Uuid
   isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")

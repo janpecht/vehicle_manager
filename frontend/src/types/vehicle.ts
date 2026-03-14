@@ -13,7 +13,6 @@ export interface Vehicle {
   id: string;
   licensePlate: string;
   label: string | null;
-  formLink: string | null;
   vehicleTypeId: string | null;
   vehicleType: VehicleType | null;
   isActive: boolean;
@@ -33,14 +32,12 @@ export interface PaginatedVehicles {
 export interface CreateVehicleInput {
   licensePlate: string;
   label?: string;
-  formLink?: string;
   vehicleTypeId?: string | null;
 }
 
 export interface UpdateVehicleInput {
   licensePlate?: string;
   label?: string | null;
-  formLink?: string | null;
   vehicleTypeId?: string | null;
   isActive?: boolean;
 }

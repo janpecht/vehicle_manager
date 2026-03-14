@@ -29,14 +29,12 @@ const licensePlateField = z
 export const createVehicleSchema = z.object({
   licensePlate: licensePlateField,
   label: z.string().max(100, 'Label is too long').optional(),
-  formLink: z.string().url('Invalid URL format').optional().or(z.literal('')),
   vehicleTypeId: z.string().uuid('Invalid vehicle type ID').optional().nullable(),
 });
 
 export const updateVehicleSchema = z.object({
   licensePlate: licensePlateField.optional(),
   label: z.string().max(100, 'Label is too long').nullable().optional(),
-  formLink: z.string().url('Invalid URL format').optional().or(z.literal('')).nullable(),
   vehicleTypeId: z.string().uuid('Invalid vehicle type ID').optional().nullable(),
   isActive: z.boolean().optional(),
 });

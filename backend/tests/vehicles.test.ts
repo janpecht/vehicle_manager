@@ -138,34 +138,6 @@ describe('POST /api/vehicles', () => {
     expect(res.status).toBe(401);
   });
 
-  it('should create a vehicle with a form link', async () => {
-    const res = await request(app)
-      .post('/api/vehicles')
-      .set(authHeader())
-      .send({ licensePlate: 'HD-AB 1234', formLink: 'https://example.com/form' });
-
-    expect(res.status).toBe(201);
-    expect(res.body.vehicle.formLink).toBe('https://example.com/form');
-  });
-
-  it('should create a vehicle with null formLink when not provided', async () => {
-    const res = await request(app)
-      .post('/api/vehicles')
-      .set(authHeader())
-      .send({ licensePlate: 'HD-AB 1234' });
-
-    expect(res.status).toBe(201);
-    expect(res.body.vehicle.formLink).toBeNull();
-  });
-
-  it('should reject invalid form link URL', async () => {
-    const res = await request(app)
-      .post('/api/vehicles')
-      .set(authHeader())
-      .send({ licensePlate: 'HD-AB 1234', formLink: 'not-a-url' });
-
-    expect(res.status).toBe(400);
-  });
 });
 
 describe('GET /api/vehicles', () => {
@@ -324,34 +296,6 @@ describe('PUT /api/vehicles/:id', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.vehicle.label).toBeNull();
-  });
-
-  it('should update vehicle form link', async () => {
-    const created = await prisma.vehicle.create({
-      data: { licensePlate: 'HD-AB 1234' },
-    });
-
-    const res = await request(app)
-      .put(`/api/vehicles/${created.id}`)
-      .set(authHeader())
-      .send({ formLink: 'https://example.com/form' });
-
-    expect(res.status).toBe(200);
-    expect(res.body.vehicle.formLink).toBe('https://example.com/form');
-  });
-
-  it('should clear form link by sending empty string', async () => {
-    const created = await prisma.vehicle.create({
-      data: { licensePlate: 'HD-AB 1234', formLink: 'https://example.com/form' },
-    });
-
-    const res = await request(app)
-      .put(`/api/vehicles/${created.id}`)
-      .set(authHeader())
-      .send({ formLink: '' });
-
-    expect(res.status).toBe(200);
-    expect(res.body.vehicle.formLink).toBeNull();
   });
 
   it('should reject duplicate license plate on update', async () => {

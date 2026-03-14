@@ -85,6 +85,14 @@ export async function getChecklist(id: string) {
   return submission;
 }
 
+export async function getPreviousSubmission(vehicleId: string, excludeId: string) {
+  return prisma.checklistSubmission.findFirst({
+    where: { vehicleId, id: { not: excludeId } },
+    orderBy: { submittedAt: 'desc' },
+    include: { driver: true },
+  });
+}
+
 export async function addPhoto(
   submissionId: string,
   data: Buffer,
