@@ -14,7 +14,7 @@ A web application for documenting and tracking damage on a fleet of delivery van
 
 ## Features
 
-- **Authentication**: Register (restricted to configurable email domain), login, JWT access/refresh token flow
+- **Authentication**: Register (restricted to configurable email domain), login, JWT access/refresh token flow, password reset via email code
 - **Vehicle Management**: CRUD with German license plate validation, search, vehicle types with custom images
 - **4-Side Damage View**: Interactive Konva.js canvas with front, rear, left, right views (custom vehicle type images supported)
 - **Damage Marking**: Draw circles or rectangles via drag, set severity (low/medium/high), add descriptions, drag to reposition
@@ -214,7 +214,7 @@ npm run format             # Format with Prettier
 /
 ├── backend/
 │   ├── src/
-│   │   ├── auth/              # Registration, login, JWT, refresh tokens
+│   │   ├── auth/              # Registration, login, JWT, refresh tokens, password reset
 │   │   ├── vehicles/          # Vehicle CRUD with German plate validation
 │   │   ├── vehicle-types/     # Vehicle types with custom side images
 │   │   ├── damages/           # Damage marking CRUD + repair
@@ -228,7 +228,7 @@ npm run format             # Format with Prettier
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── auth/          # Login & register pages
+│   │   │   ├── auth/          # Login, register, forgot/reset password pages
 │   │   │   ├── vehicles/      # Vehicle list, detail, report pages
 │   │   │   ├── damage-canvas/ # Konva.js canvas, toolbar, dialogs
 │   │   │   ├── checklist/     # Public checklist form + admin list

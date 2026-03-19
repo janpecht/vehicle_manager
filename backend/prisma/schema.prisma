@@ -24,8 +24,9 @@ model User {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   refreshTokens     RefreshToken[]
-  verificationCodes EmailVerificationCode[]
-  createdDamages    DamageMarking[] @relation("createdDamages")
+  verificationCodes  EmailVerificationCode[]
+  passwordResetCodes PasswordResetCode[]
+  createdDamages     DamageMarking[] @relation("createdDamages")
   repairedDamages   DamageMarking[] @relation("repairedDamages")
 
   @@map("users")
@@ -56,6 +57,20 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model PasswordResetCode {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  codeHash  String   @map("code_hash")
+  expiresAt DateTime @map("expires_at")
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_codes")
 }
 
 model VehicleType {

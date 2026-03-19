@@ -20,6 +20,14 @@ export async function resendVerificationCode(email: string): Promise<void> {
   await api.post('/auth/resend-code', { email });
 }
 
+export async function forgotPassword(email: string): Promise<void> {
+  await api.post('/auth/forgot-password', { email });
+}
+
+export async function resetPassword(input: { email: string; code: string; password: string }): Promise<void> {
+  await api.post('/auth/reset-password', input);
+}
+
 export async function refresh(): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>('/auth/refresh');
   return data;

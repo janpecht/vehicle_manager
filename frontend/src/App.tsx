@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-
 import { LoginPage } from './components/auth/LoginPage.tsx';
 import { RegisterPage } from './components/auth/RegisterPage.tsx';
 import { VerifyEmailPage } from './components/auth/VerifyEmailPage.tsx';
+import { ForgotPasswordPage } from './components/auth/ForgotPasswordPage.tsx';
+import { ResetPasswordPage } from './components/auth/ResetPasswordPage.tsx';
 import { ProtectedRoute } from './components/layout/ProtectedRoute.tsx';
 import { AppLayout } from './components/layout/AppLayout.tsx';
 import { LoadingSpinner } from './components/ui/LoadingSpinner.tsx';
@@ -40,6 +42,8 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         element={
           <ProtectedRoute>

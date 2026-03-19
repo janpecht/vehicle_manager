@@ -1,7 +1,7 @@
-# Claude Code Projekt-Prompt: Mercedes Sprinter Schadensmanagement-Tool
+# Claude Code Projekt-Prompt: KFZ Schadensmanagement-Tool
 
 ## Projekt-Übersicht
-Entwickle ein vollständiges Web-Tool zur Schadensdokumentation für eine Flotte von Mercedes Benz Sprinter Lieferwagen. Das Tool zeigt für jeden Sprinter (identifiziert durch Kennzeichen) eine interaktive 4-Seiten-Ansicht (Front, Heck, Links, Rechts), auf der Schäden per Klick als Kreise oder Rechtecke markiert werden können. Schäden können nach Reparatur entfernt werden. Die Grafiken lassen sich in Webformulare einbetten. Das Backend ist durch Login geschützt.
+Entwickle ein vollständiges Web-Tool zur Schadensdokumentation für eine Flotte von Lieferwagen. Das Tool zeigt für jeden Sprinter (identifiziert durch Kennzeichen) eine interaktive 4-Seiten-Ansicht (Front, Heck, Links, Rechts), auf der Schäden per Klick als Kreise oder Rechtecke markiert werden können. Schäden können nach Reparatur entfernt werden. Die Grafiken lassen sich in Webformulare einbetten. Das Backend ist durch Login geschützt.
 
 ---
 
@@ -253,6 +253,29 @@ DamageMarking {
   - Rate Limiting auf allen Endpoints
   - Logging sensibler Daten ausschließen
 - Penetration-Test-Report erstellen
+
+---
+
+### Phase F: Passwort-Zurücksetzen
+- [x] "Passwort vergessen?" Link auf Login-Seite
+- [x] POST /auth/forgot-password — sendet 6-stelligen Reset-Code per E-Mail
+- [x] POST /auth/reset-password — setzt Passwort mit gültigem Code zurück
+- [x] Prisma-Modell: PasswordResetCode (SHA-256 gehasht, 15 Min. Ablauf, max. 5 Versuche)
+- [x] Frontend: ForgotPasswordPage (E-Mail-Eingabe) → ResetPasswordPage (Code + neues Passwort)
+- [x] Session-Invalidierung nach Passwort-Reset (alle Refresh-Tokens gelöscht)
+- [x] Unverifizierte User können kein Passwort zurücksetzen
+- [x] Rate Limiting auf beiden Endpoints (authLimiter: 5 Req/15 Min)
+
+**🧪 Test-Agent Phase F:**
+- 14 Backend-Tests (forgot-password + reset-password Flows)
+- 9 Frontend-Tests (ForgotPasswordPage + ResetPasswordPage)
+- Alle Tests grün
+
+**🔒 Security-Agent Phase F:**
+- CSPRNG, SHA-256, Constant-Time-Vergleich, Attempt-Limiting: ✅
+- Session-Invalidierung nach Reset: ✅
+- Unverifizierte User blockiert: ✅ (Security-Fix)
+- Email-Enumeration: Akzeptiertes Risiko (per Anforderung)
 
 ---
 

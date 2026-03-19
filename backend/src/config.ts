@@ -24,6 +24,9 @@ const envSchema = z.object({
   // Email verification
   VERIFICATION_CODE_EXPIRES_MINUTES: z.coerce.number().int().positive().default(15),
 
+  // Password reset
+  PASSWORD_RESET_CODE_EXPIRES_MINUTES: z.coerce.number().int().positive().default(15),
+
   // Restrict registration to this email domain (e.g. "example.com")
   ALLOWED_EMAIL_DOMAIN: z.string().min(1, 'ALLOWED_EMAIL_DOMAIN is required (e.g. "example.com")'),
 });

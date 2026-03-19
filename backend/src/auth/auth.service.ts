@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../db.js';
 import { config } from '../config.js';
-import { AuthError, ConflictError, EmailNotVerifiedError } from '../utils/errors.js';
+import { AuthError, ConflictError, EmailNotVerifiedError, NotFoundError, ValidationError } from '../utils/errors.js';
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -9,6 +9,7 @@ import {
   getRefreshTokenExpiresAt,
 } from '../utils/tokens.js';
 import { createAndSendCode, verifyCode } from './verification.service.js';
+import { createAndSendResetCode, verifyResetCodeAndChangePassword } from './passwordReset.service.js';
 import type { RegisterInput, LoginInput } from './auth.schemas.js';
 
 export interface AuthTokens {
@@ -110,6 +111,30 @@ export async function resendVerificationCode(email: string): Promise<void> {
   if (!user || user.emailVerified) return;
 
   await createAndSendCode(user.id, user.email, user.name);
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    // Requirement: show error for unknown emails (intentional email enumeration trade-off)
+    throw new NotFoundError('E-Mail-Adresse nicht gefunden');
+  }
+
+  if (!user.emailVerified) {
+    throw new ValidationError('Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.');
+  }
+
+  await createAndSendResetCode(user.id, user.email, user.name);
+}
+
+export async function resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw new AuthError('Ungültige E-Mail-Adresse');
+  }
+
+  const newPasswordHash = await bcrypt.hash(newPassword, config.BCRYPT_ROUNDS);
+  await verifyResetCodeAndChangePassword(user.id, code, newPasswordHash);
 }
 
 export async function refresh(rawToken: string): Promise<{ user: UserResponse; tokens: AuthTokens }> {

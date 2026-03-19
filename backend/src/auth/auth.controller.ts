@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import * as authService from './auth.service.js';
 import { config } from '../config.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import type { RegisterInput, LoginInput, VerifyEmailInput, ResendCodeInput } from './auth.schemas.js';
+import type { RegisterInput, LoginInput, VerifyEmailInput, ResendCodeInput, ForgotPasswordInput, ResetPasswordInput } from './auth.schemas.js';
 
 const REFRESH_COOKIE_NAME = 'refresh_token';
 const REFRESH_COOKIE_PATH = '/auth';
@@ -52,6 +52,18 @@ export const resendCode = asyncHandler(async (req, res) => {
   const { email } = req.body as ResendCodeInput;
   await authService.resendVerificationCode(email);
   res.json({ message: 'Falls die E-Mail registriert und nicht verifiziert ist, wurde ein neuer Code gesendet.' });
+});
+
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body as ForgotPasswordInput;
+  await authService.forgotPassword(email);
+  res.json({ message: 'Ein Code zum Zurücksetzen wurde an Ihre E-Mail gesendet.' });
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { email, code, password } = req.body as ResetPasswordInput;
+  await authService.resetPassword(email, code, password);
+  res.json({ message: 'Passwort erfolgreich zurückgesetzt.' });
 });
 
 export const refreshToken = asyncHandler(async (req, res) => {
