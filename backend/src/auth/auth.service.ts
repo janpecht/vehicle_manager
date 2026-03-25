@@ -58,6 +58,7 @@ export async function register(
       email: input.email,
       passwordHash,
       name: input.name,
+      role: 'ADMIN',
     },
   });
 
