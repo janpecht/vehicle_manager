@@ -11,6 +11,9 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
 
+  // Number of trusted reverse proxies in front of Express (Traefik → nginx = 2)
+  TRUST_PROXY: z.coerce.number().int().min(0).default(2),
+
   // SMTP config for checklist email notifications (all optional)
   // Empty strings are treated as undefined so Docker Compose can use ${VAR:-} defaults
   SMTP_HOST: z.string().optional().transform((v) => v || undefined),

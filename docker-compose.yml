@@ -57,6 +57,7 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-}
       CHECKLIST_NOTIFY_EMAIL: ${CHECKLIST_NOTIFY_EMAIL:-}
+      TRUST_PROXY: ${TRUST_PROXY:-2}
 
   frontend:
     build:
