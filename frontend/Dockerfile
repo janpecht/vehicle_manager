@@ -15,6 +15,10 @@ RUN npm run build
 # Production stage
 FROM nginxinc/nginx-unprivileged:alpine
 
+USER root
+RUN apk add --no-cache curl
+USER nginx
+
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
