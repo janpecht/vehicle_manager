@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { stripHtml } from '../utils/sanitize.js';
 
 export const createChecklistSchema = z.object({
   driverId: z.string().uuid(),
@@ -15,7 +16,7 @@ export const createChecklistSchema = z.object({
   deliveryNotesPresent: z.boolean().optional(),
   fuelLevel: z.enum(['OK', 'LOW']).optional(),
   carWashNeeded: z.boolean().optional(),
-  notes: z.string().max(1000).optional(),
+  notes: z.string().max(1000).transform(stripHtml).optional(),
 });
 
 export const checklistQuerySchema = z.object({

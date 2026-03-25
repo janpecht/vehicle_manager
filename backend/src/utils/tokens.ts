@@ -10,13 +10,14 @@ export interface AccessTokenPayload {
 
 export function generateAccessToken(payload: AccessTokenPayload): string {
   const options: SignOptions = {
+    algorithm: 'HS256',
     expiresIn: config.ACCESS_TOKEN_EXPIRES_IN as unknown as SignOptions['expiresIn'],
   };
   return jwt.sign(payload, config.JWT_ACCESS_SECRET, options);
 }
 
 export function verifyAccessToken(token: string): AccessTokenPayload {
-  return jwt.verify(token, config.JWT_ACCESS_SECRET) as AccessTokenPayload;
+  return jwt.verify(token, config.JWT_ACCESS_SECRET, { algorithms: ['HS256'] }) as AccessTokenPayload;
 }
 
 export function generateRefreshToken(): string {

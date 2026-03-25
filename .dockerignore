@@ -1,0 +1,38 @@
+# Environment files (secrets)
+.env
+.env.*
+backend/.env
+backend/.env.*
+
+# Git
+.git
+.gitignore
+
+# Dependencies (rebuilt in Docker)
+node_modules
+
+# IDE / OS
+.vscode
+.idea
+.DS_Store
+
+# Test & coverage
+coverage
+*.test.ts
+*.spec.ts
+
+# Build artifacts
+dist
+
+# Design resources
+resources
+
+# Uploads (runtime data)
+backend/uploads
+
+# Documentation
+*.md
+!frontend/nginx.conf
+
+# Claude Code
+.claude

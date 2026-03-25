@@ -48,8 +48,8 @@ export function createApp() {
     max: 100,
   });
 
-  // API documentation (disabled in test mode)
-  if (config.NODE_ENV !== 'test') {
+  // API documentation (only in development)
+  if (config.NODE_ENV === 'development') {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
   }
 

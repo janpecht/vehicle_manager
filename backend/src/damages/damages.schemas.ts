@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { stripHtml } from '../utils/sanitize.js';
 
 const viewSideEnum = z.enum(['FRONT', 'REAR', 'LEFT', 'RIGHT']);
 const shapeEnum = z.enum(['CIRCLE', 'RECTANGLE']);
@@ -11,7 +12,7 @@ export const createDamageSchema = z.object({
   y: z.number().min(0).max(1),
   width: z.number().min(0.01).max(1),
   height: z.number().min(0.01).max(1),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500).transform(stripHtml).optional(),
   severity: severityEnum,
 });
 

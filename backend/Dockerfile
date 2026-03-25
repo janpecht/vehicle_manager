@@ -33,6 +33,10 @@ COPY --from=build /app/node_modules ./node_modules/
 COPY --from=build /app/prisma ./prisma/
 COPY --from=build /app/package.json ./
 
+# Run as non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
 EXPOSE 3001
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]

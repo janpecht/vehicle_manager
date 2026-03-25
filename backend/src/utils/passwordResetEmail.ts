@@ -7,7 +7,11 @@ function isSmtpConfigured(): boolean {
 
 export async function sendPasswordResetEmail(to: string, code: string, name: string): Promise<void> {
   if (!isSmtpConfigured()) {
-    console.log(`[DEV] Password reset code for ${to}: ${code}`);
+    if (config.NODE_ENV === 'development') {
+      console.log(`[DEV] Password reset code for ${to}: ${code}`);
+    } else {
+      console.warn(`[WARN] SMTP not configured — password reset email to ${to} could not be sent`);
+    }
     return;
   }
 

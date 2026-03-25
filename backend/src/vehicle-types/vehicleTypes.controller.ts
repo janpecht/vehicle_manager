@@ -2,6 +2,8 @@ import type { Request, Response, NextFunction } from 'express';
 import * as vehicleTypesService from './vehicleTypes.service.js';
 import { imageSideSchema } from './vehicleTypes.schemas.js';
 import { getIdParam } from '../utils/params.js';
+import { sanitizeSvg } from '../utils/sanitizeSvg.js';
+
 
 export async function list(_req: Request, res: Response, next: NextFunction) {
   try {
@@ -71,10 +73,15 @@ export async function uploadImage(req: Request, res: Response, next: NextFunctio
       return;
     }
 
+    let fileBuffer = req.file.buffer;
+    if (req.file.mimetype === 'image/svg+xml') {
+      fileBuffer = sanitizeSvg(fileBuffer);
+    }
+
     const vehicleType = await vehicleTypesService.setImage(
       id,
       sideResult.data,
-      req.file.buffer,
+      fileBuffer,
       req.file.mimetype,
     );
     res.json({ vehicleType });
@@ -106,6 +113,10 @@ export async function serveImage(req: Request, res: Response, next: NextFunction
 
     res.set('Content-Type', image.mimeType);
     res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    if (image.mimeType === 'image/svg+xml') {
+      res.set('Content-Disposition', 'inline; filename="image.svg"');
+      res.set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+    }
     res.send(image.data);
   } catch (err) {
     next(err);

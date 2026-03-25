@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { stripHtml } from '../utils/sanitize.js';
 
 /**
  * German license plate format:
@@ -28,13 +29,13 @@ const licensePlateField = z
 
 export const createVehicleSchema = z.object({
   licensePlate: licensePlateField,
-  label: z.string().max(100, 'Label is too long').optional(),
+  label: z.string().max(100, 'Label is too long').transform(stripHtml).optional(),
   vehicleTypeId: z.string().uuid('Invalid vehicle type ID').optional().nullable(),
 });
 
 export const updateVehicleSchema = z.object({
   licensePlate: licensePlateField.optional(),
-  label: z.string().max(100, 'Label is too long').nullable().optional(),
+  label: z.string().max(100, 'Label is too long').transform(stripHtml).nullable().optional(),
   vehicleTypeId: z.string().uuid('Invalid vehicle type ID').optional().nullable(),
   isActive: z.boolean().optional(),
 });
