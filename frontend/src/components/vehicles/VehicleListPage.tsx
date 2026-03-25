@@ -102,7 +102,8 @@ export function VehicleListPage() {
 
     const svgString = await QRCode.toString(url, { type: 'svg', margin: 1 });
     const pngDataUrl = await QRCode.toDataURL(url, { type: 'image/png', width: 512, margin: 1 });
-    const pngData = await fetch(pngDataUrl).then((r) => r.arrayBuffer());
+    const base64 = pngDataUrl.split(',')[1];
+    const pngData = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 
     const zip = new JSZip();
     zip.file(`QR_${safePlate}.svg`, svgString);
