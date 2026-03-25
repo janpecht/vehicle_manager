@@ -1,0 +1,50 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/Export and Reports" />
+
+# Export and Reports
+
+The application offers several ways to export and share damage data.
+
+## PNG Export
+
+On the vehicle detail page, you can download the current view as a PNG image:
+
+1. Select the desired view (Front, Rear, Left, Right).
+2. Click the **export icon** in the header.
+3. The file is downloaded as `{LICENSE_PLATE}_{VIEW}.png`.
+
+## Damage Report
+
+The damage report shows all four views and a damage list on one page:
+
+1. Click **Bericht** (Report) on the detail page.
+2. The report displays:
+   - Vehicle license plate and label
+   - Report generation date
+   - All four views with damage markings
+   - A table of all damages with view, severity, shape, description, and status
+
+## Print View
+
+The report is optimized for printing:
+
+1. Open the damage report.
+2. Click **Drucken** (Print) or press Ctrl+P.
+3. The print view removes shadows and backgrounds for a clean printout.
+
+## Public Report
+
+Each vehicle has a public report link accessible without login:
+
+- URL format: `/report/vehicles/{ID}`
+- Shows only active damages
+- Includes a print button
+
+## Embedding
+
+The damage view can be embedded in external systems as an iframe:
+
+- URL format: `/embed/vehicles/{ID}`
+- Requires authentication
+- Shows the compact report view

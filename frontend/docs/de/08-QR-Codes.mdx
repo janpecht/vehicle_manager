@@ -1,0 +1,29 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="Deutsch/QR-Codes" />
+
+# QR-Codes
+
+Fur jedes Fahrzeug kann ein QR-Code generiert werden, der zum offentlichen Checklisten-Formular fuhrt.
+
+## QR-Code herunterladen
+
+1. Gehen Sie zur **Fahrzeugliste**.
+2. Klicken Sie auf das **QR-Code-Symbol** in der Aktionsspalte des gewunschten Fahrzeugs.
+3. Eine ZIP-Datei wird heruntergeladen, die zwei Dateien enthalt:
+   - `QR_{KENNZEICHEN}.svg` -- Vektorgrafik (skalierbar)
+   - `QR_{KENNZEICHEN}.png` -- Rastergrafik (512x512 Pixel)
+
+## Checklisten-Link kopieren
+
+Alternativ zum QR-Code konnen Sie den Checklisten-Link direkt kopieren:
+
+1. Klicken Sie auf das **Link-Symbol** in der Aktionsspalte.
+2. Der Link wird in die Zwischenablage kopiert.
+3. Eine Bestatigungsmeldung erscheint.
+
+## Verwendung
+
+Der QR-Code verweist auf: `https://{DOMAIN}/checklist/{FAHRZEUG-ID}`
+
+Drucken Sie den QR-Code aus und bringen Sie ihn im Fahrzeug an (z.B. im Handschuhfach oder an der Sonnenblende). Fahrer konnen den Code scannen, um das Checklisten-Formular direkt auf ihrem Smartphone zu offnen.

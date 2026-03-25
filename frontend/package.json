@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build -o storybook-static"
   },
   "dependencies": {
     "axios": "^1.13.5",
@@ -46,6 +48,8 @@
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
+    "storybook": "^10.3.3",
+    "@storybook/react-vite": "^10.3.3",
     "vite": "^7.3.1",
     "vitest": "^3.2.4"
   }

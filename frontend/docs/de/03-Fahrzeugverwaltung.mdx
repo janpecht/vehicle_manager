@@ -1,0 +1,53 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="Deutsch/Fahrzeugverwaltung" />
+
+# Fahrzeugverwaltung
+
+Die Fahrzeugliste ist die Startseite der Anwendung. Hier sehen Sie alle Fahrzeuge Ihrer Flotte.
+
+## Fahrzeugliste
+
+Die Tabelle zeigt folgende Spalten:
+
+| Spalte | Beschreibung |
+|---|---|
+| **Kennzeichen** | Amtliches Kennzeichen (deutsches Format) |
+| **Bezeichnung** | Optionaler Anzeigename |
+| **Status** | Aktiv oder Inaktiv |
+| **Letzter km-Stand** | Letzter gemeldeter Kilometerstand aus Checklisten |
+| **Erstellt am** | Erstelldatum des Fahrzeugeintrags |
+
+### Suche und Filter
+
+- Verwenden Sie das **Suchfeld**, um nach Kennzeichen oder Bezeichnung zu filtern.
+- Aktivieren Sie **Inaktive anzeigen**, um deaktivierte Fahrzeuge einzublenden.
+- Die Liste ist paginiert (20 Fahrzeuge pro Seite).
+
+## Fahrzeug anlegen
+
+1. Klicken Sie auf **Fahrzeug hinzufugen**.
+2. Fullen Sie das Formular aus:
+   - **Kennzeichen** (Pflicht) -- muss dem deutschen Format entsprechen (z.B. "HD-AB 1234")
+   - **Bezeichnung** (optional) -- z.B. "Sprinter Kuhlfahrzeug"
+   - **Fahrzeugtyp** (optional) -- Dropdown mit verfugbaren Typen
+3. Klicken Sie auf **Speichern**.
+
+## Fahrzeug bearbeiten
+
+Klicken Sie in der Aktionsspalte auf **Bearbeiten**. Sie konnen Kennzeichen, Bezeichnung und Fahrzeugtyp andern.
+
+## Fahrzeug deaktivieren / aktivieren
+
+Klicken Sie auf **Deaktivieren** bzw. **Aktivieren**. Deaktivierte Fahrzeuge werden standardmassig ausgeblendet.
+
+## Fahrzeug loschen
+
+Klicken Sie auf **Loschen**. Ein Bestatigungsdialog wird angezeigt. Das Loschen entfernt auch alle zugehorigen Schadensmarkierungen.
+
+## Aktionen pro Fahrzeug
+
+Neben den oben genannten Aktionen gibt es zwei weitere Schnellaktionen:
+
+- **Link-Symbol** -- Kopiert den offentlichen Checklisten-Link in die Zwischenablage
+- **QR-Code-Symbol** -- Ladt einen QR-Code als ZIP-Datei herunter (siehe [QR-Codes](?path=/docs/deutsch-qr-codes--docs))

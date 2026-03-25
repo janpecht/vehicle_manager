@@ -50,6 +50,14 @@ export function AppLayout() {
               >
                 Checklisten
               </Link>
+              <a
+                href="/help"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              >
+                Hilfe
+              </a>
             </nav>
           </div>
           <div className="flex items-center gap-4">

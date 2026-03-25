@@ -1,0 +1,67 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/Damage Marking" />
+
+# Damage Marking
+
+Damage marking is the core feature of the application. On an interactive canvas, you can mark damages directly on the vehicle silhouette.
+
+## Open the View
+
+1. Click **Anzeigen** (Show) on a vehicle in the vehicle list.
+2. You will see the detail page with the interactive canvas.
+
+## Four Views
+
+Use tabs to switch between the four vehicle views:
+
+- **FRONT** -- Front view
+- **REAR** -- Rear view
+- **LEFT** -- Left side
+- **RIGHT** -- Right side
+
+Each tab displays the number of active damages for that view.
+
+## Tools
+
+The toolbar offers two shape tools:
+
+- **Circle** -- for point damages (default)
+- **Rectangle** -- for area damages
+
+## Mark a Damage
+
+1. Select the desired tool (circle or rectangle).
+2. Click and drag on the canvas to draw the shape.
+3. After releasing, the **damage form** opens.
+4. Fill in the form:
+   - **Description** (optional, max 500 characters)
+   - **Severity**: Low (yellow), Medium (orange), High (red)
+5. Click **Speichern** (Save).
+
+The damage appears immediately on the canvas, color-coded by severity.
+
+## Move a Damage
+
+Existing markings can be repositioned via drag and drop. The new position is saved automatically.
+
+## View Damage Details
+
+Click on an existing marking to open a detail popup. It shows:
+
+- Severity (with color code)
+- Shape (circle/rectangle)
+- Status (active/repaired)
+- Description (if provided)
+- Creation date
+- Repair date (if repaired)
+
+## Color Coding
+
+| Severity | Color |
+|---|---|
+| Low | Yellow |
+| Medium | Orange |
+| High | Red |
+
+Repaired damages are displayed with a dashed outline and transparent fill.

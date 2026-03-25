@@ -1,0 +1,47 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="Deutsch/Checklisten" />
+
+# Checklisten
+
+Das Checklisten-System besteht aus zwei Teilen: dem offentlichen Ubergabeformular fur Fahrer und der Admin-Ubersicht im Fahrzeugmanager.
+
+## Admin-Ubersicht
+
+Navigieren Sie zu **Checklisten** in der Hauptnavigation.
+
+### Filter
+
+Sie konnen die Einreichungen filtern nach:
+
+- **Fahrzeug** -- Dropdown aller Fahrzeuge
+- **Fahrer** -- Dropdown aller Fahrer
+- **Zeitraum** -- Von- und Bis-Datum
+
+Klicken Sie auf **Filter zurucksetzen**, um alle Filter zu entfernen.
+
+### Tabelle
+
+Die Tabelle zeigt alle Checklisten-Einreichungen:
+
+| Spalte | Beschreibung |
+|---|---|
+| **Datum** | Zeitpunkt der Einreichung |
+| **Fahrer** | Name des Fahrers |
+| **Fahrzeug** | Kennzeichen |
+| **km-Stand** | Gemeldeter Kilometerstand |
+| **Schadenstatus** | Neuer Schaden (rot), Bekannter Schaden (gelb), Kein Schaden (grun) |
+
+### Detail-Ansicht
+
+Klicken Sie auf **Anzeigen**, um alle Details einer Einreichung zu sehen:
+
+- Datum und Uhrzeit
+- Fahrer und Fahrzeug
+- Kilometerstand
+- Schadenstatus
+- Armaturenbrett-Warnungen
+- Zustand der Sitze, Laderaum etc.
+- Fahrzeugsysteme (Kuhlung, Ladekabel)
+- Anmerkungen
+- **Fotos** -- mit Vollbild-Galerie (Pfeiltasten zur Navigation, Esc zum Schliessen)

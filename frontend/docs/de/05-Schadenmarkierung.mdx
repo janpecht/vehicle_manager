@@ -1,0 +1,67 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="Deutsch/Schadenmarkierung" />
+
+# Schadenmarkierung
+
+Die Schadenmarkierung ist das Kernfeature der Anwendung. Auf einer interaktiven Leinwand konnen Schaden direkt auf der Fahrzeugsilhouette markiert werden.
+
+## Ansicht offnen
+
+1. Klicken Sie in der Fahrzeugliste auf **Anzeigen** bei einem Fahrzeug.
+2. Sie sehen die Detail-Seite mit der interaktiven Leinwand.
+
+## Vier Ansichten
+
+Uber Tabs konnen Sie zwischen den vier Fahrzeugansichten wechseln:
+
+- **FRONT** -- Vorderansicht
+- **HECK** -- Heckansicht
+- **LINKS** -- Linke Seite
+- **RECHTS** -- Rechte Seite
+
+Jeder Tab zeigt die Anzahl der aktiven Schaden fur diese Ansicht an.
+
+## Werkzeuge
+
+In der Werkzeugleiste stehen zwei Formen zur Verfugung:
+
+- **Kreis** -- fur punktuelle Schaden (Standard)
+- **Rechteck** -- fur flachige Schaden
+
+## Schaden markieren
+
+1. Wahlen Sie das gewunschte Werkzeug (Kreis oder Rechteck).
+2. Klicken und ziehen Sie auf der Leinwand, um die Form zu zeichnen.
+3. Nach dem Loslassen offnet sich das **Schadenformular**.
+4. Fullen Sie das Formular aus:
+   - **Beschreibung** (optional, max. 500 Zeichen)
+   - **Schweregrad**: Niedrig (gelb), Mittel (orange), Hoch (rot)
+5. Klicken Sie auf **Speichern**.
+
+Der Schaden erscheint sofort farbcodiert auf der Leinwand.
+
+## Schaden verschieben
+
+Bestehende Markierungen konnen per Drag & Drop verschoben werden. Die neue Position wird automatisch gespeichert.
+
+## Schaden-Details anzeigen
+
+Klicken Sie auf eine bestehende Markierung, um ein Detail-Popup zu offnen. Dieses zeigt:
+
+- Schweregrad (mit Farbcode)
+- Form (Kreis/Rechteck)
+- Status (Aktiv/Repariert)
+- Beschreibung (falls vorhanden)
+- Erstelldatum
+- Reparaturdatum (falls repariert)
+
+## Farbcodierung
+
+| Schweregrad | Farbe |
+|---|---|
+| Niedrig | Gelb |
+| Mittel | Orange |
+| Hoch | Rot |
+
+Reparierte Schaden werden mit gestricheltem Umriss und transparenter Fullung dargestellt.

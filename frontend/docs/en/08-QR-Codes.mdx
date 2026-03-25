@@ -1,0 +1,29 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/QR Codes" />
+
+# QR Codes
+
+For each vehicle, a QR code can be generated that links to the public checklist form.
+
+## Download QR Code
+
+1. Go to the **vehicle list**.
+2. Click the **QR code icon** in the actions column of the desired vehicle.
+3. A ZIP file is downloaded containing two files:
+   - `QR_{LICENSE_PLATE}.svg` -- Vector graphic (scalable)
+   - `QR_{LICENSE_PLATE}.png` -- Raster image (512x512 pixels)
+
+## Copy Checklist Link
+
+Alternatively, you can copy the checklist link directly:
+
+1. Click the **link icon** in the actions column.
+2. The link is copied to your clipboard.
+3. A confirmation message appears.
+
+## Usage
+
+The QR code points to: `https://{DOMAIN}/checklist/{VEHICLE-ID}`
+
+Print the QR code and place it in the vehicle (e.g., in the glove compartment or on the sun visor). Drivers can scan the code to open the checklist form directly on their smartphone.

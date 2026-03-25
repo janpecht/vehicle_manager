@@ -1,0 +1,53 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/Vehicle Management" />
+
+# Vehicle Management
+
+The vehicle list is the home page of the application. Here you can see all vehicles in your fleet.
+
+## Vehicle List
+
+The table displays the following columns:
+
+| Column | Description |
+|---|---|
+| **License Plate** | Official license plate (German format) |
+| **Label** | Optional display name |
+| **Status** | Active or Inactive |
+| **Latest Mileage** | Last reported mileage from checklists |
+| **Created** | Creation date of the vehicle entry |
+
+### Search and Filter
+
+- Use the **search field** to filter by license plate or label.
+- Enable **Show inactive** to display deactivated vehicles.
+- The list is paginated (20 vehicles per page).
+
+## Create a Vehicle
+
+1. Click **Fahrzeug hinzufugen** (Add vehicle).
+2. Fill in the form:
+   - **License plate** (required) -- must follow German format (e.g., "HD-AB 1234")
+   - **Label** (optional) -- e.g., "Sprinter Refrigerated"
+   - **Vehicle type** (optional) -- dropdown with available types
+3. Click **Speichern** (Save).
+
+## Edit a Vehicle
+
+Click **Bearbeiten** (Edit) in the actions column. You can change the license plate, label, and vehicle type.
+
+## Deactivate / Activate
+
+Click **Deaktivieren** (Deactivate) or **Aktivieren** (Activate). Deactivated vehicles are hidden by default.
+
+## Delete a Vehicle
+
+Click **Loschen** (Delete). A confirmation dialog is shown. Deleting also removes all associated damage markings.
+
+## Quick Actions
+
+In addition to the above, each vehicle row has two icon buttons:
+
+- **Link icon** -- Copies the public checklist link to the clipboard
+- **QR code icon** -- Downloads a QR code as a ZIP file (see [QR Codes](?path=/docs/english-qr-codes--docs))

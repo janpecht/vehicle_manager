@@ -1,0 +1,50 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="Deutsch/Export und Berichte" />
+
+# Export und Berichte
+
+Die Anwendung bietet verschiedene Moglichkeiten, Schadensdaten zu exportieren und zu teilen.
+
+## PNG-Export
+
+Auf der Fahrzeug-Detailseite konnen Sie die aktuelle Ansicht als PNG-Bild herunterladen:
+
+1. Wahlen Sie die gewunschte Ansicht (Front, Heck, Links, Rechts).
+2. Klicken Sie auf das **Export-Symbol** in der Kopfzeile.
+3. Die Datei wird als `{KENNZEICHEN}_{ANSICHT}.png` heruntergeladen.
+
+## Schadenbericht
+
+Der Schadenbericht zeigt alle vier Ansichten und eine Schadensliste auf einer Seite:
+
+1. Klicken Sie auf der Detailseite auf **Bericht**.
+2. Der Bericht zeigt:
+   - Fahrzeugkennzeichen und Bezeichnung
+   - Erstelldatum des Berichts
+   - Alle vier Ansichten mit Schadensmarkierungen
+   - Eine Tabelle aller Schaden mit Ansicht, Schweregrad, Form, Beschreibung und Status
+
+## Druckansicht
+
+Der Bericht ist fur den Druck optimiert:
+
+1. Offnen Sie den Schadenbericht.
+2. Klicken Sie auf **Drucken** oder verwenden Sie Strg+P.
+3. Die Druckansicht entfernt Schatten und Hintegrunde fur ein sauberes Druckbild.
+
+## Offentlicher Bericht
+
+Jedes Fahrzeug hat einen offentlichen Berichtslink, der ohne Login zuganglich ist:
+
+- URL-Format: `/report/vehicles/{ID}`
+- Zeigt nur aktive Schaden
+- Enthalt eine Druckfunktion
+
+## Einbettung
+
+Die Schadensansicht kann als iFrame in externe Systeme eingebettet werden:
+
+- URL-Format: `/embed/vehicles/{ID}`
+- Erfordert Authentifizierung
+- Zeigt die kompakte Berichtsansicht

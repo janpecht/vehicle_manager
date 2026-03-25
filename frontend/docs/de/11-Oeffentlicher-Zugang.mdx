@@ -1,0 +1,50 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="Deutsch/Oeffentlicher Zugang" />
+
+# Offentlicher Zugang
+
+Bestimmte Bereiche der Anwendung sind ohne Login zuganglich.
+
+## Checklisten-Formular
+
+Das Checklisten-Formular ist offentlich uber QR-Code oder Direktlink erreichbar:
+
+- URL: `/checklist/{FAHRZEUG-ID}` (mit vorausgewahltem Fahrzeug)
+- URL: `/checklist` (ohne Vorauswahl)
+
+### Sprachumschaltung
+
+Oben rechts kann zwischen **Deutsch** und **Englisch** umgeschaltet werden.
+
+### Formularfelder
+
+Das Formular umfasst folgende Abschnitte:
+
+1. **Fahrer** -- Auswahl aus aktiven Fahrern
+2. **Fahrzeug** -- Auswahl aus aktiven Fahrzeugen (ggf. vorausgewahlt)
+3. **Kilometerstand** -- Aktueller Tachostand
+4. **Schadensstatus** -- Auswahl mit Vorschau aller vier Fahrzeugansichten:
+   - Neuer Schaden
+   - Bekannter Schaden
+   - Kein Schaden
+5. **Fotos** (nur bei "Neuer Schaden") -- Kamera-Aufnahme oder Dateiauswahl
+6. **Armaturenbrett-Warnungen** -- Checkboxen fur Ol, AdBlue, Sonstiges
+7. **Zustand** -- Ja/Nein-Auswahl fur Sitze, Rauchen, Essensreste, Laderaum
+8. **Fahrzeugsysteme** -- Kuhlung, Ladekabel
+9. **Optionale Felder** -- Lieferscheine, Tankfullstand, Waschanlage
+10. **Anmerkungen** -- Freitextfeld (max. 1000 Zeichen)
+
+### Einreichung
+
+Klicken Sie auf **Absenden**. Nach erfolgreicher Einreichung erscheint eine Bestatigungsseite mit der Moglichkeit, eine neue Checkliste auszufullen.
+
+> Bei kritischen Eingaben (z.B. "Neuer Schaden") wird automatisch eine Benachrichtigungs-E-Mail versendet.
+
+## Offentlicher Schadensbericht
+
+Der Schadensbericht eines Fahrzeugs ist offentlich einsehbar:
+
+- URL: `/report/vehicles/{ID}`
+- Zeigt alle aktiven Schaden auf allen vier Ansichten
+- Enthalt eine Druckfunktion

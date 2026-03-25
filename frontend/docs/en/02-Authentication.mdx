@@ -1,0 +1,39 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/Authentication" />
+
+# Authentication
+
+## Registration
+
+1. Open the **registration page** via the link on the login page.
+2. Enter your **name**, **email address**, and a **password**.
+3. The password must be at least 8 characters long and contain uppercase letters, lowercase letters, and digits.
+4. After registration, a **6-digit verification code** is sent to your email.
+
+> Note: Only email addresses from the company domain can register.
+
+## Email Verification
+
+1. Enter the 6-digit code you received by email.
+2. The input fields advance automatically. You can also paste the code (Ctrl+V).
+3. If the code didn't arrive, click **Resend code** (available after 60 seconds).
+4. After successful verification, you will be redirected to the login page.
+
+## Login
+
+1. Enter your **email address** and **password**.
+2. After successful login, you will be taken to the vehicle list.
+3. Your session remains active and is automatically refreshed in the background.
+
+## Forgot Password
+
+1. Click **Forgot password?** on the login page.
+2. Enter your email address.
+3. You will receive a **6-digit reset code** by email (valid for 15 minutes).
+4. Enter the code and your new password on the reset page.
+5. After resetting, all existing sessions are terminated.
+
+## Logout
+
+Click **Abmelden** (Logout) in the top right corner to sign out.

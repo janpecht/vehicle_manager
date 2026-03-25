@@ -1,0 +1,36 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/Damage Repair" />
+
+# Damage Repair
+
+Repaired damages can be marked as resolved without deleting them. This preserves the damage history.
+
+## Mark as Repaired
+
+1. Open the vehicle detail page.
+2. Click on the damage marking on the canvas.
+3. In the detail popup, click **Als repariert markieren** (Mark as repaired).
+4. Confirm the action in the confirmation dialog.
+
+## Appearance of Repaired Damages
+
+Repaired damages are visually distinguished:
+
+- **Dashed outline** instead of a solid line
+- **Transparent fill** instead of opaque color
+- The **repair date** is shown in the detail popup
+
+## Filter
+
+Use the **Reparierte anzeigen** (Show repaired) toggle in the toolbar to show or hide repaired damages. By default, only active damages are displayed.
+
+## Delete a Damage
+
+Active (non-repaired) damages can be deleted via the detail popup:
+
+1. Click on the marking.
+2. Click **Loschen** (Delete).
+3. Confirm the deletion.
+
+> Note: Deleting removes the damage permanently. Use "Mark as repaired" instead to preserve the history.

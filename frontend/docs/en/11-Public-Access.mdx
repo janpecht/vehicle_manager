@@ -1,0 +1,50 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/Public Access" />
+
+# Public Access
+
+Certain areas of the application are accessible without login.
+
+## Checklist Form
+
+The checklist form is publicly accessible via QR code or direct link:
+
+- URL: `/checklist/{VEHICLE-ID}` (with preselected vehicle)
+- URL: `/checklist` (without preselection)
+
+### Language Switcher
+
+In the top right corner, you can switch between **German** and **English**.
+
+### Form Fields
+
+The form includes the following sections:
+
+1. **Driver** -- Selection from active drivers
+2. **Vehicle** -- Selection from active vehicles (may be preselected)
+3. **Mileage** -- Current odometer reading
+4. **Damage Status** -- Selection with preview of all four vehicle views:
+   - New damage
+   - Known damage
+   - No damage
+5. **Photos** (only for "New damage") -- Camera capture or file selection
+6. **Dashboard Warnings** -- Checkboxes for oil, AdBlue, other warnings
+7. **Condition** -- Yes/No selection for seats, smoking, food leftovers, cargo area
+8. **Vehicle Systems** -- Cooling, charging cables
+9. **Optional Fields** -- Delivery notes, fuel level, car wash needed
+10. **Notes** -- Free text field (max 1000 characters)
+
+### Submission
+
+Click the submit button. After successful submission, a confirmation page appears with the option to fill out a new checklist.
+
+> For critical entries (e.g., "New damage"), a notification email is automatically sent.
+
+## Public Damage Report
+
+The damage report for a vehicle is publicly accessible:
+
+- URL: `/report/vehicles/{ID}`
+- Shows all active damages across all four views
+- Includes a print button

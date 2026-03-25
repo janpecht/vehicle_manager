@@ -1,0 +1,47 @@
+import { Meta } from 'storybook/blocks';
+
+<Meta title="English/Checklists" />
+
+# Checklists
+
+The checklist system consists of two parts: the public handover form for drivers and the admin overview in the Vehicle Manager.
+
+## Admin Overview
+
+Navigate to **Checklisten** (Checklists) in the main navigation.
+
+### Filters
+
+You can filter submissions by:
+
+- **Vehicle** -- Dropdown of all vehicles
+- **Driver** -- Dropdown of all drivers
+- **Date range** -- From and To date
+
+Click **Filter zurucksetzen** (Reset filters) to clear all filters.
+
+### Table
+
+The table shows all checklist submissions:
+
+| Column | Description |
+|---|---|
+| **Date** | Submission timestamp |
+| **Driver** | Driver name |
+| **Vehicle** | License plate |
+| **Mileage** | Reported odometer reading |
+| **Damage Status** | New damage (red), Known damage (yellow), No damage (green) |
+
+### Detail View
+
+Click **Anzeigen** (Show) to see all details of a submission:
+
+- Date and time
+- Driver and vehicle
+- Mileage
+- Damage status
+- Dashboard warnings
+- Condition of seats, cargo area, etc.
+- Vehicle systems (cooling, charging cables)
+- Notes
+- **Photos** -- with full-screen gallery (arrow keys to navigate, Esc to close)
