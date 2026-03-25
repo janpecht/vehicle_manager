@@ -51,7 +51,7 @@ export function AppLayout() {
                 Checklisten
               </Link>
               <a
-                href="/help"
+                href="/help/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900"
